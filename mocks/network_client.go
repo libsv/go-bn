@@ -6,6 +6,7 @@ package mocks
 import (
 	"context"
 	"github.com/libsv/go-bn"
+	"github.com/libsv/go-bn/internal"
 	"github.com/libsv/go-bn/models"
 	"sync"
 )
@@ -20,7 +21,7 @@ var _ bn.NetworkClient = &NetworkClientMock{}
 //
 // 		// make and configure a mocked bn.NetworkClient
 // 		mockedNetworkClient := &NetworkClientMock{
-// 			AddNodeFunc: func(ctx context.Context, node string, command bn.NodeAddType) error {
+// 			AddNodeFunc: func(ctx context.Context, node string, command internal.NodeAddType) error {
 // 				panic("mock out the AddNode method")
 // 			},
 // 			ClearBannedFunc: func(ctx context.Context) error {
@@ -53,7 +54,7 @@ var _ bn.NetworkClient = &NetworkClientMock{}
 // 			PingFunc: func(ctx context.Context) error {
 // 				panic("mock out the Ping method")
 // 			},
-// 			SetBanFunc: func(ctx context.Context, subnet string, action bn.BanAction, opts *models.OptsSetBan) error {
+// 			SetBanFunc: func(ctx context.Context, subnet string, action internal.BanAction, opts *models.OptsSetBan) error {
 // 				panic("mock out the SetBan method")
 // 			},
 // 			SetBlockMaxSizeFunc: func(ctx context.Context, size uint64) (string, error) {
@@ -76,7 +77,7 @@ var _ bn.NetworkClient = &NetworkClientMock{}
 // 	}
 type NetworkClientMock struct {
 	// AddNodeFunc mocks the AddNode method.
-	AddNodeFunc func(ctx context.Context, node string, command bn.NodeAddType) error
+	AddNodeFunc func(ctx context.Context, node string, command internal.NodeAddType) error
 
 	// ClearBannedFunc mocks the ClearBanned method.
 	ClearBannedFunc func(ctx context.Context) error
@@ -109,7 +110,7 @@ type NetworkClientMock struct {
 	PingFunc func(ctx context.Context) error
 
 	// SetBanFunc mocks the SetBan method.
-	SetBanFunc func(ctx context.Context, subnet string, action bn.BanAction, opts *models.OptsSetBan) error
+	SetBanFunc func(ctx context.Context, subnet string, action internal.BanAction, opts *models.OptsSetBan) error
 
 	// SetBlockMaxSizeFunc mocks the SetBlockMaxSize method.
 	SetBlockMaxSizeFunc func(ctx context.Context, size uint64) (string, error)
@@ -132,7 +133,7 @@ type NetworkClientMock struct {
 			// Node is the node argument value.
 			Node string
 			// Command is the command argument value.
-			Command bn.NodeAddType
+			Command internal.NodeAddType
 		}
 		// ClearBanned holds details about calls to the ClearBanned method.
 		ClearBanned []struct {
@@ -195,7 +196,7 @@ type NetworkClientMock struct {
 			// Subnet is the subnet argument value.
 			Subnet string
 			// Action is the action argument value.
-			Action bn.BanAction
+			Action internal.BanAction
 			// Opts is the opts argument value.
 			Opts *models.OptsSetBan
 		}
@@ -247,14 +248,14 @@ type NetworkClientMock struct {
 }
 
 // AddNode calls AddNodeFunc.
-func (mock *NetworkClientMock) AddNode(ctx context.Context, node string, command bn.NodeAddType) error {
+func (mock *NetworkClientMock) AddNode(ctx context.Context, node string, command internal.NodeAddType) error {
 	if mock.AddNodeFunc == nil {
 		panic("NetworkClientMock.AddNodeFunc: method is nil but NetworkClient.AddNode was just called")
 	}
 	callInfo := struct {
 		Ctx     context.Context
 		Node    string
-		Command bn.NodeAddType
+		Command internal.NodeAddType
 	}{
 		Ctx:     ctx,
 		Node:    node,
@@ -272,12 +273,12 @@ func (mock *NetworkClientMock) AddNode(ctx context.Context, node string, command
 func (mock *NetworkClientMock) AddNodeCalls() []struct {
 	Ctx     context.Context
 	Node    string
-	Command bn.NodeAddType
+	Command internal.NodeAddType
 } {
 	var calls []struct {
 		Ctx     context.Context
 		Node    string
-		Command bn.NodeAddType
+		Command internal.NodeAddType
 	}
 	mock.lockAddNode.RLock()
 	calls = mock.calls.AddNode
@@ -604,14 +605,14 @@ func (mock *NetworkClientMock) PingCalls() []struct {
 }
 
 // SetBan calls SetBanFunc.
-func (mock *NetworkClientMock) SetBan(ctx context.Context, subnet string, action bn.BanAction, opts *models.OptsSetBan) error {
+func (mock *NetworkClientMock) SetBan(ctx context.Context, subnet string, action internal.BanAction, opts *models.OptsSetBan) error {
 	if mock.SetBanFunc == nil {
 		panic("NetworkClientMock.SetBanFunc: method is nil but NetworkClient.SetBan was just called")
 	}
 	callInfo := struct {
 		Ctx    context.Context
 		Subnet string
-		Action bn.BanAction
+		Action internal.BanAction
 		Opts   *models.OptsSetBan
 	}{
 		Ctx:    ctx,
@@ -631,13 +632,13 @@ func (mock *NetworkClientMock) SetBan(ctx context.Context, subnet string, action
 func (mock *NetworkClientMock) SetBanCalls() []struct {
 	Ctx    context.Context
 	Subnet string
-	Action bn.BanAction
+	Action internal.BanAction
 	Opts   *models.OptsSetBan
 } {
 	var calls []struct {
 		Ctx    context.Context
 		Subnet string
-		Action bn.BanAction
+		Action internal.BanAction
 		Opts   *models.OptsSetBan
 	}
 	mock.lockSetBan.RLock()

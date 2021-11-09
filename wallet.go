@@ -6,6 +6,7 @@ import (
 	"github.com/libsv/go-bk/wif"
 	imodels "github.com/libsv/go-bn/internal/models"
 	"github.com/libsv/go-bn/models"
+	"github.com/libsv/go-bt/v2"
 )
 
 type WalletClient interface {
@@ -25,8 +26,30 @@ type WalletClient interface {
 	Transaction(ctx context.Context, txID string) (*models.Transaction, error)
 	ImportAddress(ctx context.Context, address string, opts *models.OptsImportAddress) error
 	WalletInfo(ctx context.Context) (*models.WalletInfo, error)
-	// import multi
+	ImportMulti(ctx context.Context, reqs []models.ImportMultiRequest, opts *models.OptsImportMulti) ([]*models.ImportMulti, error)
 	ImportPrivateKey(ctx context.Context, w *wif.WIF, opts *models.OptsImportPrivateKey) error
+	ImportPrunedFunds(ctx context.Context, tx *bt.Tx, txOutProof string) error
+	ImportPublicKey(ctx context.Context, publicKey string, opts *models.OptsImportPublicKey) error
+	ImportWallet(ctx context.Context, filename string) error
+	KeypoolRefill(ctx context.Context, opts *models.OptsKeypoolRefill) error
+	ListAccounts(ctx context.Context, opts *models.OptsListAccounts) (map[string]float64, error)
+	// List address groupings
+	ListLockUnspent(ctx context.Context) ([]*models.LockUnspent, error)
+	ListReceivedByAccount(ctx context.Context, opts *models.OptsListReceivedBy) ([]*models.ReceivedByAccount, error)
+	ListReceivedByAddress(ctx context.Context, opts *models.OptsListReceivedBy) ([]*models.ReceivedByAddress, error)
+	ListSinceBlock(ctx context.Context, opts *models.OptsListSinceBlock) (*models.SinceBlock, error)
+	ListTransactions(ctx context.Context, opts *models.OptsListTransactions) ([]*models.Transaction, error)
+	ListUnspent(ctx context.Context, opts *models.OptsListUnspent) (bt.UTXOs, error)
+	ListWallets(ctx context.Context) ([]string, error)
+	LockUnspent(ctx context.Context, lock bool, opts *models.OptsLockUnspent) (bool, error)
+	Move(ctx context.Context, from, to string, amount float64, opts *models.OptsMove) (bool, error)
+	RemovePrunedFunds(ctx context.Context, txID string) error
+	SendFrom(ctx context.Context, from, to string, amount float64, opts *models.OptsSendFrom) (string, error)
+	SendMany(ctx context.Context, from string, amounts map[string]float64, opts *models.OptsSendMany) (string, error)
+	SendToAddress(ctx context.Context, address string, amount float64, opts *models.OptsSendToAddress) (string, error)
+	SetAccount(ctx context.Context, address, account string) error
+	SetTxFee(ctx context.Context, amount float64) (bool, error)
+	SignMessage(ctx context.Context, address, message string) (string, error)
 	EncryptWallet(ctx context.Context, passphrase string) error
 	WalletPhassphrase(ctx context.Context, passphrase string, timeout int) error
 	WalletPhassphraseChange(ctx context.Context, oldPassphrase, newPassphrase string) error
@@ -116,14 +139,114 @@ func (c *client) WalletInfo(ctx context.Context) (*models.WalletInfo, error) {
 	return &resp, c.rpc.Do(ctx, "getwalletinfo", &resp)
 }
 
-// TODO: importmulti onward
 func (c *client) ImportMulti(ctx context.Context, reqs []models.ImportMultiRequest, opts *models.OptsImportMulti) ([]*models.ImportMulti, error) {
+	var resp []*models.ImportMulti
+	return resp, c.rpc.Do(ctx, "importmulti", &resp, c.argsFor(opts, reqs)...)
+}
 
+func (c *client) ImportPrunedFunds(ctx context.Context, tx *bt.Tx, txOutProof string) error {
+	return c.rpc.Do(ctx, "importprunedfunds", nil, tx.String(), txOutProof)
+}
+
+func (c *client) ImportPublicKey(ctx context.Context, publicKey string, opts *models.OptsImportPublicKey) error {
+	return c.rpc.Do(ctx, "importpubkey", nil, c.argsFor(opts, publicKey)...)
 }
 
 // TODO: don't cache. test.
 func (c *client) ImportPrivateKey(ctx context.Context, w *wif.WIF, opts *models.OptsImportPrivateKey) error {
 	return c.rpc.Do(ctx, "importprivkey", nil, c.argsFor(opts, w.String())...)
+}
+
+func (c *client) ImportWallet(ctx context.Context, filename string) error {
+	return c.rpc.Do(ctx, "importwallet", nil, filename)
+}
+
+func (c *client) KeypoolRefill(ctx context.Context, opts *models.OptsKeypoolRefill) error {
+	return c.rpc.Do(ctx, "keypoolrefill", nil, c.argsFor(opts)...)
+}
+
+func (c *client) ListAccounts(ctx context.Context, opts *models.OptsListAccounts) (map[string]float64, error) {
+	var resp map[string]float64
+	return resp, c.rpc.Do(ctx, "listaccounts", &resp, c.argsFor(opts)...)
+}
+
+func (c *client) ListLockUnspent(ctx context.Context) ([]*models.LockUnspent, error) {
+	var resp []*models.LockUnspent
+	return resp, c.rpc.Do(ctx, "listlockunspent", &resp)
+}
+
+func (c *client) ListReceivedByAccount(ctx context.Context, opts *models.OptsListReceivedBy) ([]*models.ReceivedByAccount, error) {
+	var resp []*models.ReceivedByAccount
+	return resp, c.rpc.Do(ctx, "listreceivedbyaccount", &resp, c.argsFor(opts)...)
+}
+
+func (c *client) ListReceivedByAddress(ctx context.Context, opts *models.OptsListReceivedBy) ([]*models.ReceivedByAddress, error) {
+	var resp []*models.ReceivedByAddress
+	return resp, c.rpc.Do(ctx, "listreceivedbyaddress", &resp, c.argsFor(opts)...)
+}
+
+func (c *client) ListSinceBlock(ctx context.Context, opts *models.OptsListSinceBlock) (*models.SinceBlock, error) {
+	var resp models.SinceBlock
+	return &resp, c.rpc.Do(ctx, "listsinceblock", &resp, c.argsFor(opts)...)
+}
+
+func (c *client) ListTransactions(ctx context.Context, opts *models.OptsListTransactions) ([]*models.Transaction, error) {
+	var resp []*models.Transaction
+	return resp, c.rpc.Do(ctx, "listtransactions", &resp, c.argsFor(opts)...)
+}
+
+func (c *client) ListUnspent(ctx context.Context, opts *models.OptsListUnspent) (bt.UTXOs, error) {
+	var resp bt.UTXOs
+	return resp, c.rpc.Do(ctx, "listunspent", &resp, c.argsFor(opts)...)
+}
+
+func (c *client) ListWallets(ctx context.Context) ([]string, error) {
+	var resp []string
+	return resp, c.rpc.Do(ctx, "listwallets", &resp)
+}
+
+// TODO: do not cache
+func (c *client) LockUnspent(ctx context.Context, lock bool, opts *models.OptsLockUnspent) (bool, error) {
+	var resp bool
+	return resp, c.rpc.Do(ctx, "lockunspent", &resp, c.argsFor(opts, lock)...)
+}
+
+func (c *client) Move(ctx context.Context, from, to string, amount float64, opts *models.OptsMove) (bool, error) {
+	var resp bool
+	return resp, c.rpc.Do(ctx, "move", &resp, c.argsFor(opts, from, to, amount)...)
+}
+
+func (c *client) RemovePrunedFunds(ctx context.Context, txID string) error {
+	return c.rpc.Do(ctx, "removeprunedfunds", nil, txID)
+}
+
+func (c *client) SendFrom(ctx context.Context, from, to string, amount float64, opts *models.OptsSendFrom) (string, error) {
+	var resp string
+	return resp, c.rpc.Do(ctx, "sendfrom", &resp, c.argsFor(opts, from, to, amount)...)
+}
+
+func (c *client) SendMany(ctx context.Context, from string, amounts map[string]float64, opts *models.OptsSendMany) (string, error) {
+	var resp string
+	return resp, c.rpc.Do(ctx, "sendmany", &resp, c.argsFor(opts, from, amounts)...)
+}
+
+func (c *client) SendToAddress(ctx context.Context, address string, amount float64, opts *models.OptsSendToAddress) (string, error) {
+	var resp string
+	return resp, c.rpc.Do(ctx, "sendtoaddress", &resp, c.argsFor(opts, address, amount)...)
+}
+
+func (c *client) SetAccount(ctx context.Context, address, account string) error {
+	return c.rpc.Do(ctx, "setaccount", nil, address, account)
+}
+
+func (c *client) SetTxFee(ctx context.Context, amount float64) (bool, error) {
+	var resp bool
+	return resp, c.rpc.Do(ctx, "settxfee", &resp, amount)
+}
+
+func (c *client) SignMessage(ctx context.Context, address, message string) (string, error) {
+	var resp string
+	return resp, c.rpc.Do(ctx, "signmessage", &resp, address, message)
 }
 
 func (c *client) EncryptWallet(ctx context.Context, passphrase string) error {

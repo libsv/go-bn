@@ -1,6 +1,10 @@
 package models
 
-import "github.com/libsv/go-bt/v2"
+import (
+	"time"
+
+	"github.com/libsv/go-bt/v2"
+)
 
 type DumpWallet struct {
 	FileName string `json:"filename"`
@@ -97,5 +101,269 @@ func (o *OptsImportPrivateKey) Args() []interface{} {
 }
 
 type ImportMultiRequest struct {
-	LockingScript string
+	LockingScript string    `json:"scriptPubKey"`
+	Address       string    `json:"address"`
+	Timestamp     time.Time `json:"timestamp"`
+	RedeemScript  string    `json:"redeemscript"`
+	PubKeys       []string  `json:"pubkeys"`
+	Keys          []string  `json:"keys"`
+	Internal      bool      `json:"internal"`
+	WatchOnly     bool      `json:"watchonly"`
+	Label         string    `json:"label"`
+}
+
+type OptsImportMulti struct {
+	Rescan *bool `json:"rescan"`
+}
+
+func (o *OptsImportMulti) Args() []interface{} {
+	if o.Rescan == nil {
+		return []interface{}{false}
+	}
+
+	return []interface{}{*o.Rescan}
+}
+
+type ImportMulti struct {
+	Success bool `json:"success"`
+	Error   struct {
+		Code    int    `json:"code"`
+		Message string `json:"message"`
+	} `json:"error"`
+}
+
+type OptsImportPublicKey struct {
+	Label  string
+	Rescan *bool
+}
+
+func (o *OptsImportPublicKey) Args() []interface{} {
+	aa := []interface{}{o.Label}
+	if o.Rescan == nil {
+		return aa
+	}
+
+	return append(aa, *o.Rescan)
+}
+
+type OptsKeypoolRefill struct {
+	NewSize int
+}
+
+func (o *OptsKeypoolRefill) Args() []interface{} {
+	if o.NewSize == 0 {
+		return nil
+	}
+
+	return []interface{}{o.NewSize}
+}
+
+type OptsListAccounts struct {
+	MinConf          int
+	IncludeWatchOnly bool
+}
+
+func (o *OptsListAccounts) Args() []interface{} {
+	aa := []interface{}{o.MinConf}
+	if o.MinConf == 0 {
+		aa[0] = 1
+	}
+
+	return append(aa, o.IncludeWatchOnly)
+}
+
+type LockUnspent struct {
+	TxID string `json:"txid"`
+	Vout int    `json:"vout"`
+}
+
+type ReceivedByAccount struct {
+	InvolvesWatchOnly bool    `json:"involvesWatchOnly"`
+	Account           string  `json:"account"`
+	Amount            float64 `json:"amount"`
+	Confirmations     int     `json:"confirmations"`
+	Label             string  `json:"label"`
+}
+
+type OptsListReceivedBy struct {
+	MinConf          int
+	IncludeEmpty     bool
+	IncludeWatchOnly bool
+}
+
+func (o *OptsListReceivedBy) Args() []interface{} {
+	aa := []interface{}{o.MinConf}
+	if o.MinConf == 0 {
+		aa[0] = 1
+	}
+
+	return append(aa, o.IncludeEmpty, o.IncludeWatchOnly)
+}
+
+type ReceivedByAddress struct {
+	InvolvesWatchOnly bool     `json:"involvesWatchOnly"`
+	Address           string   `json:"address"`
+	Account           string   `json:"account"`
+	Amount            float64  `json:"amount"`
+	Confirmations     int      `json:"confirmations"`
+	Label             string   `json:"label"`
+	TxIDs             []string `json:"txids"`
+}
+
+type SinceBlock struct {
+	Txs []struct {
+		Account       string  `json:"account"`
+		Address       string  `json:"address"`
+		Category      string  `json:"category"`
+		Amount        float64 `json:"amount"`
+		Generated     bool    `json:"generated"`
+		Vout          int     `json:"vout"`
+		Fee           float64 `json:"fee"`
+		Confirmations int     `json:"confirmations"`
+		BlockHash     string  `json:"blockhash"`
+		BlockIndex    int     `json:"blockindex"`
+		TxID          string  `json:"txid"`
+		Time          uint64  `json:"time"`
+		TimeReceived  uint64  `json:"timereceived"`
+		Abandoned     bool    `json:"abandoned"`
+		Comment       string  `json:"comment"`
+		Label         string  `json:"label"`
+		To            string  `json:"to"`
+	} `json:"transactions"`
+	LastBlock string `json:"lastblock"`
+}
+
+type OptsListSinceBlock struct {
+	BlockHash           string
+	TargetConfirmations int
+	IncludeWatchOnly    bool
+}
+
+func (o *OptsListSinceBlock) Args() []interface{} {
+	aa := []interface{}{o.BlockHash, o.TargetConfirmations}
+	if o.TargetConfirmations == 0 {
+		aa[1] = 1
+	}
+
+	return append(aa, o.IncludeWatchOnly)
+}
+
+type OptsListTransactions struct {
+	Count            int
+	Skip             int
+	IncludeWatchOnly bool
+}
+
+func (o *OptsListTransactions) Args() []interface{} {
+	count := o.Count
+	if count == 0 {
+		count = 10
+	}
+
+	return []interface{}{"*", o.Count, o.Skip, o.IncludeWatchOnly}
+}
+
+type OptsListUnspent struct {
+	MinConf       int
+	MaxConf       int
+	Address       []string
+	IncludeUnsafe *bool
+}
+
+func (o *OptsListUnspent) Args() []interface{} {
+	aa := []interface{}{o.MinConf, o.MaxConf}
+	if o.MinConf == 0 {
+		o.MinConf = 1
+	}
+	if o.MaxConf == 0 {
+		o.MaxConf = 9999999
+	}
+
+	if o.Address != nil && len(o.Address) > 0 {
+		aa = append(aa, o.Address)
+	}
+
+	if o.IncludeUnsafe == nil {
+		return aa
+	}
+
+	if len(aa) == 2 {
+		aa = append(aa, []string{})
+	}
+
+	return append(aa, o.IncludeUnsafe)
+}
+
+type OptsLockUnspent struct {
+	Txs []LockUnspent
+}
+
+func (o *OptsLockUnspent) Args() []interface{} {
+	if o.Txs == nil || len(o.Txs) == 0 {
+		return nil
+	}
+
+	return []interface{}{o.Txs}
+}
+
+type OptsMove struct {
+	Comment string
+}
+
+func (o *OptsMove) Args() []interface{} {
+	if o.Comment != "" {
+		return []interface{}{"", o.Comment}
+	}
+
+	return nil
+}
+
+type OptsSendFrom struct {
+	MinConf   int
+	Comment   string
+	CommentTo string
+}
+
+func (o *OptsSendFrom) Args() []interface{} {
+	aa := []interface{}{o.MinConf}
+	if aa[0] == 0 {
+		aa[0] = 1
+	}
+
+	return append(aa, o.Comment, o.CommentTo)
+}
+
+type OptsSendMany struct {
+	MinConf         int
+	Comment         string
+	SubtractFeeFrom []string
+}
+
+func (o *OptsSendMany) Args() []interface{} {
+	aa := []interface{}{o.MinConf, o.Comment}
+	if o.MinConf == 0 {
+		aa[0] = 1
+	}
+
+	if o.SubtractFeeFrom != nil && len(o.SubtractFeeFrom) > 1 {
+		aa = append(aa, o.SubtractFeeFrom)
+	}
+
+	return aa
+}
+
+type OptsSendToAddress struct {
+	Comment         string
+	CommentTo       string
+	SubtractFeeFrom []string
+}
+
+func (o *OptsSendToAddress) Args() []interface{} {
+	aa := []interface{}{o.Comment, o.CommentTo}
+
+	if o.SubtractFeeFrom != nil && len(o.SubtractFeeFrom) > 1 {
+		aa = append(aa, o.SubtractFeeFrom)
+	}
+
+	return aa
 }

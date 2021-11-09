@@ -6,15 +6,15 @@ import (
 	"github.com/libsv/go-bn/models"
 )
 
-type nodeAddType string
+type NodeAddType string
 
 const (
-	NodeAddOneTry nodeAddType = "onetry"
-	NodeAddRemove nodeAddType = "remove"
-	NodeAddAdd    nodeAddType = "add"
+	NodeAddOneTry NodeAddType = "onetry"
+	NodeAddRemove NodeAddType = "remove"
+	NodeAddAdd    NodeAddType = "add"
 )
 
-type banAction string
+type BanAction string
 
 const (
 	BanActionAdd    = "add"
@@ -23,7 +23,7 @@ const (
 
 type NetworkClient interface {
 	Ping(ctx context.Context) error
-	AddNode(ctx context.Context, node string, command nodeAddType) error
+	AddNode(ctx context.Context, node string, command NodeAddType) error
 	ClearBanned(ctx context.Context) error
 	DisconnectNode(ctx context.Context, params models.ParamsDisconnectNode) error
 	NodeInfo(ctx context.Context, opts *models.OptsNodeInfo) ([]*models.NodeInfo, error)
@@ -33,7 +33,7 @@ type NetworkClient interface {
 	NetworkInfo(ctx context.Context) (*models.NetworkInfo, error)
 	PeerInfo(ctx context.Context) ([]*models.PeerInfo, error)
 	ListBanned(ctx context.Context) ([]*models.BannedSubnet, error)
-	SetBan(ctx context.Context, subnet string, action banAction, opts *models.OptsSetBan) error
+	SetBan(ctx context.Context, subnet string, action BanAction, opts *models.OptsSetBan) error
 	SetBlockMaxSize(ctx context.Context, size uint64) (string, error)
 	SetExcessiveBlock(ctx context.Context, size uint64) (string, error)
 	SetNetworkActive(ctx context.Context, enabled bool) error
@@ -44,7 +44,7 @@ func (c *client) Ping(ctx context.Context) error {
 	return c.rpc.Do(ctx, "ping", nil)
 }
 
-func (c *client) AddNode(ctx context.Context, node string, command nodeAddType) error {
+func (c *client) AddNode(ctx context.Context, node string, command NodeAddType) error {
 	return c.rpc.Do(ctx, "addnode", nil, node, command)
 }
 
@@ -91,7 +91,7 @@ func (c *client) ListBanned(ctx context.Context) ([]*models.BannedSubnet, error)
 	return resp, c.rpc.Do(ctx, "listbanned", &resp)
 }
 
-func (c *client) SetBan(ctx context.Context, subnet string, action banAction, opts *models.OptsSetBan) error {
+func (c *client) SetBan(ctx context.Context, subnet string, action BanAction, opts *models.OptsSetBan) error {
 	return c.rpc.Do(ctx, "setban", nil, c.argsFor(opts, subnet, action)...)
 }
 

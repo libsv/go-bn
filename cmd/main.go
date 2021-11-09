@@ -22,7 +22,7 @@ func main() {
 		go func() {
 			defer wg.Done()
 
-			resp, err := c.WalletInfo(ctx)
+			resp, err := c.SignMessage(ctx, "mpvmxsAgDBGfdfM7WCJXq3UrJxBpfoH2RC", "hola")
 			if err != nil {
 				panic(err)
 			}

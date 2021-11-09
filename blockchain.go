@@ -8,6 +8,7 @@ import (
 	"github.com/libsv/go-bt/v2"
 )
 
+// BlockChainClient interfaces interaction with the blockchain sub commands on a bitcoin node.
 type BlockChainClient interface {
 	BestBlockHash(ctx context.Context) (string, error)
 	BlockHex(ctx context.Context, hash string) (string, error)
@@ -27,7 +28,8 @@ type BlockChainClient interface {
 	ChainTxStats(ctx context.Context, opts *models.OptsChainTxStats) (*models.ChainTxStats, error)
 	Difficulty(ctx context.Context) (float64, error)
 	MerkleProof(ctx context.Context, blockHash, txID string, opts *models.OptsMerkleProof) (*bc.MerkleProof, error)
-	LegacyMerkleProof(ctx context.Context, txID string, opts *models.OptsLegacyMerkleProof) (*models.LegacyMerkleProof, error)
+	LegacyMerkleProof(ctx context.Context, txID string,
+		opts *models.OptsLegacyMerkleProof) (*models.LegacyMerkleProof, error)
 	RawMempool(ctx context.Context) (models.MempoolTxs, error)
 	RawMempoolIDs(ctx context.Context) ([]string, error)
 	RawNonFinalMempool(ctx context.Context) ([]string, error)
@@ -47,7 +49,8 @@ type BlockChainClient interface {
 	GenerateToAddress(ctx context.Context, n int, addr string, opts *models.OptsGenerate) ([]string, error)
 }
 
-func NewBlockChainClient(oo ...optFunc) BlockChainClient {
+// NewBlockChainClient returns a client only capable of interfacing with the blockchain sub commands on a bitcoin node.
+func NewBlockChainClient(oo ...BitcoinClientOptFunc) BlockChainClient {
 	return NewNodeClient(oo...)
 }
 
@@ -176,12 +179,14 @@ func (c *client) MempoolDescendantIDs(ctx context.Context, txID string) ([]strin
 	return resp, c.rpc.Do(ctx, "getmempooldescendants", &resp, txID, false)
 }
 
-func (c *client) MerkleProof(ctx context.Context, blockHash, txID string, opts *models.OptsMerkleProof) (*bc.MerkleProof, error) {
+func (c *client) MerkleProof(ctx context.Context, blockHash, txID string,
+	opts *models.OptsMerkleProof) (*bc.MerkleProof, error) {
 	var resp bc.MerkleProof
 	return &resp, c.rpc.Do(ctx, "getmerkleproof2", &resp, c.argsFor(opts, blockHash, txID)...)
 }
 
-func (c *client) LegacyMerkleProof(ctx context.Context, txID string, opts *models.OptsLegacyMerkleProof) (*models.LegacyMerkleProof, error) {
+func (c *client) LegacyMerkleProof(ctx context.Context, txID string,
+	opts *models.OptsLegacyMerkleProof) (*models.LegacyMerkleProof, error) {
 	var resp models.LegacyMerkleProof
 	return &resp, c.rpc.Do(ctx, "getmerkleproof", &resp, c.argsFor(opts, txID)...)
 }
@@ -224,7 +229,8 @@ func (c *client) Generate(ctx context.Context, n int, opts *models.OptsGenerate)
 	return resp, c.rpc.Do(ctx, "generate", &resp, c.argsFor(opts, n)...)
 }
 
-func (c *client) GenerateToAddress(ctx context.Context, n int, addr string, opts *models.OptsGenerate) ([]string, error) {
+func (c *client) GenerateToAddress(ctx context.Context, n int, addr string,
+	opts *models.OptsGenerate) ([]string, error) {
 	var resp []string
 	return resp, c.rpc.Do(ctx, "generatetoaddress", &resp, c.argsFor(opts, n, addr)...)
 }

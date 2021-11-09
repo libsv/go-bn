@@ -1,10 +1,12 @@
 package models
 
+// ZMQNotification model.
 type ZMQNotification struct {
 	Notification string `json:"notification"`
 	Address      string `json:"address"`
 }
 
+// Info model.
 type Info struct {
 	Version                      uint32  `json:"version"`
 	ProtocolVersion              uint32  `json:"protocolversion"`
@@ -27,6 +29,7 @@ type Info struct {
 	MaxStackMemoryUsageConsensus uint64  `json:"maxstackmemoryusageconsensus"`
 }
 
+// MemoryInfo model.
 type MemoryInfo struct {
 	Locked struct {
 		Used       uint32 `json:"used"`
@@ -41,6 +44,7 @@ type MemoryInfo struct {
 	} `json:"preloading"`
 }
 
+// Settings model.
 type Settings struct {
 	ExcessiveBlockSize              uint32  `json:"excessiveblocksize"`
 	BlockMaxsIze                    uint32  `json:"blockmaxsize"`

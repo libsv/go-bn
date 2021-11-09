@@ -7,17 +7,20 @@ import (
 	"github.com/libsv/go-bn/models"
 )
 
+// NodeAdd enums.
 const (
 	NodeAddOneTry internal.NodeAddType = "onetry"
 	NodeAddRemove internal.NodeAddType = "remove"
 	NodeAddAdd    internal.NodeAddType = "add"
 )
 
+// BanAction enums.
 const (
 	BanActionAdd    internal.BanAction = "add"
 	BanActionRemove internal.BanAction = "remove"
 )
 
+// NetworkClient interfaces interaction with the network sub commands on a bitcoin node.
 type NetworkClient interface {
 	Ping(ctx context.Context) error
 	AddNode(ctx context.Context, node string, command internal.NodeAddType) error
@@ -35,6 +38,11 @@ type NetworkClient interface {
 	SetExcessiveBlock(ctx context.Context, size uint64) (string, error)
 	SetNetworkActive(ctx context.Context, enabled bool) error
 	SetTxPropagationFrequency(ctx context.Context, frequency uint64) error
+}
+
+// NewNetworkClient returns a client only capable of interfacing with the network sub commands on a bitcoin node.
+func NewNetworkClient(oo ...BitcoinClientOptFunc) NetworkClient {
+	return NewNodeClient(oo...)
 }
 
 func (c *client) Ping(ctx context.Context) error {

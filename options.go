@@ -2,7 +2,8 @@ package bn
 
 import "time"
 
-type optFunc func(c *clientOpts)
+// BitcoinClientOptFunc for setting bitcoin client options.
+type BitcoinClientOptFunc func(c *clientOpts)
 
 type clientOpts struct {
 	timeout   time.Duration
@@ -13,32 +14,37 @@ type clientOpts struct {
 	isMainnet bool
 }
 
-func WithTimeout(seconds time.Duration) optFunc {
+// WithTimeout set the timeout for the http client.
+func WithTimeout(seconds time.Duration) BitcoinClientOptFunc {
 	return func(c *clientOpts) {
 		c.timeout = seconds
 	}
 }
 
-func WithCache() optFunc {
+// WithCache enable response caching.
+func WithCache() BitcoinClientOptFunc {
 	return func(c *clientOpts) {
 		c.cache = true
 	}
 }
 
-func WithHost(host string) optFunc {
+// WithHost set the bitcoin node host.
+func WithHost(host string) BitcoinClientOptFunc {
 	return func(c *clientOpts) {
 		c.host = host
 	}
 }
 
-func WithCreds(username, password string) optFunc {
+// WithCreds set the bitcoin node credentials.
+func WithCreds(username, password string) BitcoinClientOptFunc {
 	return func(c *clientOpts) {
 		c.username = username
 		c.password = password
 	}
 }
 
-func WithMainnet() optFunc {
+// WithMainnet set whether or not the node is a mainnet node.
+func WithMainnet() BitcoinClientOptFunc {
 	return func(c *clientOpts) {
 		c.isMainnet = true
 	}

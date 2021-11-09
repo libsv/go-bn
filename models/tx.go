@@ -8,6 +8,7 @@ import (
 	"github.com/libsv/go-bt/v2/sighash"
 )
 
+// Output model.
 type Output struct {
 	BestBlock     string
 	Confirmations uint32
@@ -16,10 +17,12 @@ type Output struct {
 	*bt.Output
 }
 
+// NodeJSON return node json variant.
 func (o *Output) NodeJSON() interface{} {
 	return o
 }
 
+// UnmarshalJSON unmarshal response.
 func (o *Output) UnmarshalJSON(b []byte) error {
 	oj := struct {
 		BestBlock     string `json:"bestblock"`
@@ -44,30 +47,35 @@ func (o *Output) UnmarshalJSON(b []byte) error {
 	return nil
 }
 
+// OutputSetInfo model.
 type OutputSetInfo struct {
 	Height         uint32  `json:"height"`
 	BestBlock      string  `json:"bestblock"`
 	Transactions   uint32  `json:"transactions"`
 	OutputCount    uint32  `json:"txouts"`
 	BogoSize       uint32  `json:"bogosize"`
-	HashSerialised string  `json:"hash_serialized"`
+	HashSerialised string  `json:"hash_serialized"` //nolint:misspell // in json response
 	DiskSize       uint32  `json:"disk_size"`
 	TotalAmount    float64 `json:"total_amount"`
 }
 
+// OptsOutput options.
 type OptsOutput struct {
 	IncludeMempool bool
 }
 
+// Args convert struct into optional positional arguments.
 func (o *OptsOutput) Args() []interface{} {
 	return []interface{}{o.IncludeMempool}
 }
 
+// ParamsCreateRawTransaction model.
 type ParamsCreateRawTransaction struct {
 	Outputs []*bt.Output
 	mainnet bool
 }
 
+// Args convert struct into optional positional arguments.
 func (p *ParamsCreateRawTransaction) Args() []interface{} {
 	outputs := make(map[string]float64, len(p.Outputs))
 	for _, o := range p.Outputs {
@@ -86,16 +94,19 @@ func (p *ParamsCreateRawTransaction) Args() []interface{} {
 	return []interface{}{outputs}
 }
 
+// SetIsMainnet set request is in mainnet context.
 func (p *ParamsCreateRawTransaction) SetIsMainnet(b bool) {
 	p.mainnet = b
 }
 
+// FundRawTransaction model.
 type FundRawTransaction struct {
 	Fee            uint64 `json:"fee"`
 	ChangePosition int    `json:"changeposition"`
 	Tx             *bt.Tx
 }
 
+// OptsFundRawTransaction options.
 type OptsFundRawTransaction struct {
 	ChangeAddress          string   `json:"changeAddress,omitempty"`
 	ChangePosition         int      `json:"changePosition,omitempty"`
@@ -106,21 +117,25 @@ type OptsFundRawTransaction struct {
 	SubtractFeeFromOutputs []uint64 `json:"subtractFeeFromOutputs,omitempty"`
 }
 
+// Args convert struct into optional positional arguments.
 func (o *OptsFundRawTransaction) Args() []interface{} {
 	return []interface{}{o}
 }
 
+// SendRawTransaction model.
 type SendRawTransaction struct {
 	Hex string
 	Tx  *bt.Tx
 }
 
+// PostProcess data.
 func (s *SendRawTransaction) PostProcess() error {
 	var err error
 	s.Tx, err = bt.NewTxFromString(s.Hex)
 	return err
 }
 
+// SignedRawTransaction model.
 type SignedRawTransaction struct {
 	Tx       *bt.Tx `json:"tx"`
 	Complete bool   `json:"complete"`
@@ -133,12 +148,14 @@ type SignedRawTransaction struct {
 	} `json:"errors"`
 }
 
+// OptsSignRawTransaction options.
 type OptsSignRawTransaction struct {
 	From        bt.UTXOs
 	PrivateKeys []string
 	SigHashType sighash.Flag
 }
 
+// Args convert struct into optional positional arguments.
 func (o *OptsSignRawTransaction) Args() []interface{} {
 	aa := []interface{}{[]interface{}{}, []interface{}{}}
 	if o.From != nil && len(o.From) > 0 {
@@ -150,11 +167,13 @@ func (o *OptsSignRawTransaction) Args() []interface{} {
 	return append(aa, o.SigHashType.String())
 }
 
+// OptsSendRawTransaction options.
 type OptsSendRawTransaction struct {
 	AllowHighFees bool
 	CheckFee      bool
 }
 
+// Args convert struct into optional positional arguments.
 func (o *OptsSendRawTransaction) Args() []interface{} {
 	return []interface{}{o.AllowHighFees, !o.CheckFee}
 }

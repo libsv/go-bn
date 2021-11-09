@@ -1,5 +1,6 @@
 package models
 
+// ChainInfo model.
 type ChainInfo struct {
 	Chain                string  `json:"chain"`
 	Blocks               uint32  `json:"blocks"`
@@ -19,6 +20,7 @@ type ChainInfo struct {
 	} `json:"softforks"`
 }
 
+// BlockStats model.
 type BlockStats struct {
 	AvgFee           float64 `json:"avgfee"`
 	AvgFeeRate       float64 `json:"avgfeerate"`
@@ -46,6 +48,7 @@ type BlockStats struct {
 	UtxoSizeIncrease uint32  `json:"utxo_size_inc"`
 }
 
+// ChainTip model.
 type ChainTip struct {
 	Height    uint32 `json:"height"`
 	Hash      string `json:"hash"`
@@ -53,6 +56,7 @@ type ChainTip struct {
 	Status    string `json:"status"`
 }
 
+// ChainTxStats model.
 type ChainTxStats struct {
 	Time             uint32  `json:"time"`
 	TxCount          uint32  `json:"txcount"`
@@ -62,6 +66,7 @@ type ChainTxStats struct {
 	TxRate           float32 `json:"txrate"`
 }
 
+// LegacyMerkleProof model.
 type LegacyMerkleProof struct {
 	Flags  uint32      `json:"flags"`
 	Index  uint32      `json:"index"`
@@ -70,6 +75,7 @@ type LegacyMerkleProof struct {
 	Nodes  []string    `json:"nodes"`
 }
 
+// MempoolEntry model.
 type MempoolEntry struct {
 	Size        uint32   `json:"size"`
 	Fee         float64  `json:"fee"`
@@ -79,8 +85,10 @@ type MempoolEntry struct {
 	Depends     []string `json:"depends"`
 }
 
+// MempoolTxs model.
 type MempoolTxs map[string]MempoolEntry
 
+// JournalStatus model.
 type JournalStatus struct {
 	Ok     bool    `json:"ok"`
 	Errors *string `json:"errors"`

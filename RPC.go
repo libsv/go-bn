@@ -5,10 +5,11 @@ import (
 	"reflect"
 	"time"
 
-	"github.com/libsv/go-bn/config"
+	"github.com/libsv/go-bn/internal/config"
 	"github.com/libsv/go-bn/internal/service"
 )
 
+// NodeClient interfaces interacting with all commands on a bitcoin node.
 type NodeClient interface {
 	BlockChainClient
 	ControlClient
@@ -28,7 +29,9 @@ type client struct {
 	isMainnet bool
 }
 
-func NewNodeClient(oo ...optFunc) NodeClient {
+// NewNodeClient returns a node client, built from the provided option funcs.
+// This client is used for interfacing with the bitcoin node across all subcategories.
+func NewNodeClient(oo ...BitcoinClientOptFunc) NodeClient {
 	opts := &clientOpts{
 		timeout:  30 * time.Second,
 		host:     "http://localhost:8332",

@@ -6,16 +6,19 @@ import (
 	"github.com/libsv/go-bt/v2"
 )
 
+// BlockDecodeHeader model.
 type BlockDecodeHeader struct {
 	Txs []string `json:"tx"`
 	BlockHeader
 }
 
+// Block model.
 type Block struct {
 	Txs bt.Txs `json:"tx"`
 	BlockHeader
 }
 
+// UnmarshalJSON unmarshal response.
 func (b *Block) UnmarshalJSON(bb []byte) error {
 	bj := struct {
 		Txs json.RawMessage `json:"tx"`
@@ -35,6 +38,7 @@ func (b *Block) UnmarshalJSON(bb []byte) error {
 	return nil
 }
 
+// BlockHeader model.
 type BlockHeader struct {
 	Hash              string  `json:"hash"`
 	Confirmations     uint64  `json:"confirmations"`
@@ -53,6 +57,7 @@ type BlockHeader struct {
 	NextBlockHash     string  `json:"nextblockhash"`
 }
 
+// BlockTemplate model.
 type BlockTemplate struct {
 	Capabilities      []string `json:"capabilities"`
 	Version           uint64   `json:"version"`
@@ -73,11 +78,13 @@ type BlockTemplate struct {
 	Height        uint64   `json:"height"`
 }
 
+// BlockTemplateRequest model.
 type BlockTemplateRequest struct {
 	Mode         string
 	Capabilities []string
 }
 
+// Args convert struct into optional positional arguments.
 func (r *BlockTemplateRequest) Args() []interface{} {
 	return []interface{}{r}
 }

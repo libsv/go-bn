@@ -6,16 +6,19 @@ import (
 	"github.com/libsv/go-bt/v2"
 )
 
+// DumpWallet response.
 type DumpWallet struct {
 	FileName string `json:"filename"`
 }
 
+// OptsBalance options.
 type OptsBalance struct {
 	Account              string
 	MinimumConfirmations uint32
 	IncludeWatchOnly     bool
 }
 
+// Args convert struct into optional positional arguments.
 func (o *OptsBalance) Args() []interface{} {
 	aa := []interface{}{o.Account, o.MinimumConfirmations, o.IncludeWatchOnly}
 	if o.MinimumConfirmations == 0 {
@@ -25,14 +28,17 @@ func (o *OptsBalance) Args() []interface{} {
 	return aa
 }
 
+// OptsNewAddress options.
 type OptsNewAddress struct {
 	Account string
 }
 
+// Args convert struct into optional positional arguments.
 func (o *OptsNewAddress) Args() []interface{} {
 	return []interface{}{o.Account}
 }
 
+// Transaction model.
 type Transaction struct {
 	Amount          float64       `json:"amount"`
 	Fee             float64       `json:"fee"`
@@ -57,6 +63,7 @@ type Transaction struct {
 	Tx *bt.Tx `json:"tx"`
 }
 
+// WalletInfo model.
 type WalletInfo struct {
 	WalletName            string  `json:"walletname"`
 	WalletVersion         uint64  `json:"walletversion"`
@@ -71,12 +78,14 @@ type WalletInfo struct {
 	HDMasterKeyID         string  `json:"hdmasterkeyid"`
 }
 
+// OptsImportAddress options.
 type OptsImportAddress struct {
 	Label  string
 	Rescan *bool
 	P2SH   bool
 }
 
+// Args convert struct into optional positional arguments.
 func (o *OptsImportAddress) Args() []interface{} {
 	aa := []interface{}{o.Label, true, o.P2SH}
 	if o.Rescan != nil {
@@ -86,11 +95,13 @@ func (o *OptsImportAddress) Args() []interface{} {
 	return aa
 }
 
+// OptsImportPrivateKey options.
 type OptsImportPrivateKey struct {
 	Label  string
 	Rescan *bool
 }
 
+// Args convert struct into optional positional arguments.
 func (o *OptsImportPrivateKey) Args() []interface{} {
 	aa := []interface{}{o.Label}
 	if o.Rescan != nil {
@@ -100,6 +111,7 @@ func (o *OptsImportPrivateKey) Args() []interface{} {
 	return aa
 }
 
+// ImportMultiRequest model.
 type ImportMultiRequest struct {
 	LockingScript string    `json:"scriptPubKey"`
 	Address       string    `json:"address"`
@@ -112,10 +124,12 @@ type ImportMultiRequest struct {
 	Label         string    `json:"label"`
 }
 
+// OptsImportMulti options.
 type OptsImportMulti struct {
 	Rescan *bool `json:"rescan"`
 }
 
+// Args convert struct into optional positional arguments.
 func (o *OptsImportMulti) Args() []interface{} {
 	if o.Rescan == nil {
 		return []interface{}{false}
@@ -124,6 +138,7 @@ func (o *OptsImportMulti) Args() []interface{} {
 	return []interface{}{*o.Rescan}
 }
 
+// ImportMulti model.
 type ImportMulti struct {
 	Success bool `json:"success"`
 	Error   struct {
@@ -132,11 +147,13 @@ type ImportMulti struct {
 	} `json:"error"`
 }
 
+// OptsImportPublicKey options.
 type OptsImportPublicKey struct {
 	Label  string
 	Rescan *bool
 }
 
+// Args convert struct into optional positional arguments.
 func (o *OptsImportPublicKey) Args() []interface{} {
 	aa := []interface{}{o.Label}
 	if o.Rescan == nil {
@@ -146,10 +163,12 @@ func (o *OptsImportPublicKey) Args() []interface{} {
 	return append(aa, *o.Rescan)
 }
 
+// OptsKeypoolRefill options.
 type OptsKeypoolRefill struct {
 	NewSize int
 }
 
+// Args convert struct into optional positional arguments.
 func (o *OptsKeypoolRefill) Args() []interface{} {
 	if o.NewSize == 0 {
 		return nil
@@ -158,11 +177,13 @@ func (o *OptsKeypoolRefill) Args() []interface{} {
 	return []interface{}{o.NewSize}
 }
 
+// OptsListAccounts options.
 type OptsListAccounts struct {
 	MinConf          int
 	IncludeWatchOnly bool
 }
 
+// Args convert struct into optional positional arguments.
 func (o *OptsListAccounts) Args() []interface{} {
 	aa := []interface{}{o.MinConf}
 	if o.MinConf == 0 {
@@ -172,11 +193,13 @@ func (o *OptsListAccounts) Args() []interface{} {
 	return append(aa, o.IncludeWatchOnly)
 }
 
+// LockUnspent model.
 type LockUnspent struct {
 	TxID string `json:"txid"`
 	Vout int    `json:"vout"`
 }
 
+// ReceivedByAccount model.
 type ReceivedByAccount struct {
 	InvolvesWatchOnly bool    `json:"involvesWatchOnly"`
 	Account           string  `json:"account"`
@@ -185,12 +208,14 @@ type ReceivedByAccount struct {
 	Label             string  `json:"label"`
 }
 
+// OptsListReceivedBy options.
 type OptsListReceivedBy struct {
 	MinConf          int
 	IncludeEmpty     bool
 	IncludeWatchOnly bool
 }
 
+// Args convert struct into optional positional arguments.
 func (o *OptsListReceivedBy) Args() []interface{} {
 	aa := []interface{}{o.MinConf}
 	if o.MinConf == 0 {
@@ -200,6 +225,7 @@ func (o *OptsListReceivedBy) Args() []interface{} {
 	return append(aa, o.IncludeEmpty, o.IncludeWatchOnly)
 }
 
+// ReceivedByAddress model.
 type ReceivedByAddress struct {
 	InvolvesWatchOnly bool     `json:"involvesWatchOnly"`
 	Address           string   `json:"address"`
@@ -210,6 +236,7 @@ type ReceivedByAddress struct {
 	TxIDs             []string `json:"txids"`
 }
 
+// SinceBlock model.
 type SinceBlock struct {
 	Txs []struct {
 		Account       string  `json:"account"`
@@ -233,12 +260,14 @@ type SinceBlock struct {
 	LastBlock string `json:"lastblock"`
 }
 
+// OptsListSinceBlock options.
 type OptsListSinceBlock struct {
 	BlockHash           string
 	TargetConfirmations int
 	IncludeWatchOnly    bool
 }
 
+// Args convert struct into optional positional arguments.
 func (o *OptsListSinceBlock) Args() []interface{} {
 	aa := []interface{}{o.BlockHash, o.TargetConfirmations}
 	if o.TargetConfirmations == 0 {
@@ -248,21 +277,24 @@ func (o *OptsListSinceBlock) Args() []interface{} {
 	return append(aa, o.IncludeWatchOnly)
 }
 
+// OptsListTransactions options.
 type OptsListTransactions struct {
 	Count            int
 	Skip             int
 	IncludeWatchOnly bool
 }
 
+// Args convert struct into optional positional arguments.
 func (o *OptsListTransactions) Args() []interface{} {
 	count := o.Count
 	if count == 0 {
 		count = 10
 	}
 
-	return []interface{}{"*", o.Count, o.Skip, o.IncludeWatchOnly}
+	return []interface{}{"*", count, o.Skip, o.IncludeWatchOnly}
 }
 
+// OptsListUnspent options.
 type OptsListUnspent struct {
 	MinConf       int
 	MaxConf       int
@@ -270,6 +302,7 @@ type OptsListUnspent struct {
 	IncludeUnsafe *bool
 }
 
+// Args convert struct into optional positional arguments.
 func (o *OptsListUnspent) Args() []interface{} {
 	aa := []interface{}{o.MinConf, o.MaxConf}
 	if o.MinConf == 0 {
@@ -294,10 +327,12 @@ func (o *OptsListUnspent) Args() []interface{} {
 	return append(aa, o.IncludeUnsafe)
 }
 
+// OptsLockUnspent options.
 type OptsLockUnspent struct {
 	Txs []LockUnspent
 }
 
+// Args convert struct into optional positional arguments.
 func (o *OptsLockUnspent) Args() []interface{} {
 	if o.Txs == nil || len(o.Txs) == 0 {
 		return nil
@@ -306,10 +341,12 @@ func (o *OptsLockUnspent) Args() []interface{} {
 	return []interface{}{o.Txs}
 }
 
+// OptsMove options.
 type OptsMove struct {
 	Comment string
 }
 
+// Args convert struct into optional positional arguments.
 func (o *OptsMove) Args() []interface{} {
 	if o.Comment != "" {
 		return []interface{}{"", o.Comment}
@@ -318,12 +355,14 @@ func (o *OptsMove) Args() []interface{} {
 	return nil
 }
 
+// OptsSendFrom options.
 type OptsSendFrom struct {
 	MinConf   int
 	Comment   string
 	CommentTo string
 }
 
+// Args convert struct into optional positional arguments.
 func (o *OptsSendFrom) Args() []interface{} {
 	aa := []interface{}{o.MinConf}
 	if aa[0] == 0 {
@@ -333,12 +372,14 @@ func (o *OptsSendFrom) Args() []interface{} {
 	return append(aa, o.Comment, o.CommentTo)
 }
 
+// OptsSendMany options.
 type OptsSendMany struct {
 	MinConf         int
 	Comment         string
 	SubtractFeeFrom []string
 }
 
+// Args convert struct into optional positional arguments.
 func (o *OptsSendMany) Args() []interface{} {
 	aa := []interface{}{o.MinConf, o.Comment}
 	if o.MinConf == 0 {
@@ -352,12 +393,14 @@ func (o *OptsSendMany) Args() []interface{} {
 	return aa
 }
 
+// OptsSendToAddress options.
 type OptsSendToAddress struct {
 	Comment         string
 	CommentTo       string
 	SubtractFeeFrom []string
 }
 
+// Args convert struct into optional positional arguments.
 func (o *OptsSendToAddress) Args() []interface{} {
 	aa := []interface{}{o.Comment, o.CommentTo}
 

@@ -7,12 +7,18 @@ import (
 	"github.com/libsv/go-bn/models"
 )
 
+// UtilClient interfaces interaction with the util sub commands on a bitcoin node.
 type UtilClient interface {
 	ClearInvalidTransactions(ctx context.Context) (uint64, error)
 	CreateMultiSig(ctx context.Context, n int, keys ...string) (*models.MultiSig, error)
 	ValidateAddress(ctx context.Context, address string) (*models.ValidateAddress, error)
 	SignMessageWithPrivKey(ctx context.Context, w *wif.WIF, msg string) (string, error)
 	VerifySignedMessage(ctx context.Context, w *wif.WIF, signature, message string) (bool, error)
+}
+
+// NewUtilClient returns a client only capable of interfacing with the util sub commands on a bitcoin node.
+func NewUtilClient(oo ...BitcoinClientOptFunc) UtilClient {
+	return NewNodeClient(oo...)
 }
 
 // TODO: should not be cached

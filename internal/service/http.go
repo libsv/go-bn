@@ -9,17 +9,19 @@ import (
 
 	"golang.org/x/sync/singleflight"
 
-	"github.com/libsv/go-bn/config"
+	"github.com/libsv/go-bn/internal/config"
 	"github.com/libsv/go-bn/models"
 	"github.com/pkg/errors"
 )
 
+// Boiler RPC fields.
 const (
 	ID      = "go-bn"
 	JSONRpc = "1.0"
 )
 
 var (
+	// ErrRPCQuery error when rpc query fails.
 	ErrRPCQuery = errors.New("failed to perform rpc query")
 )
 
@@ -29,6 +31,7 @@ type rpc struct {
 	g   singleflight.Group
 }
 
+// NewRPC returns a new RPC configured RPC client.
 func NewRPC(cfg *config.RPC, c *http.Client) RPC {
 	return &rpc{
 		cfg: cfg,
@@ -37,6 +40,7 @@ func NewRPC(cfg *config.RPC, c *http.Client) RPC {
 	}
 }
 
+// Do an RPC request.
 func (h *rpc) Do(ctx context.Context, method string, out interface{}, args ...interface{}) error {
 	return h.do(ctx, request{method: method, args: args}, out)
 }
@@ -93,7 +97,7 @@ func (h *rpc) do(ctx context.Context, r request, out interface{}) error {
 	reply := models.Response{
 		Result: out,
 	}
-	if json.NewDecoder(bytes.NewBuffer(data.([]byte))).Decode(&reply); err != nil {
+	if err = json.NewDecoder(bytes.NewBuffer(data.([]byte))).Decode(&reply); err != nil {
 		return err
 	}
 

@@ -1,10 +1,12 @@
 package models
 
+// ParamsDisconnectNode model.
 type ParamsDisconnectNode struct {
 	Address string
 	ID      uint64
 }
 
+// Args convert struct into optional positional arguments.
 func (p *ParamsDisconnectNode) Args() []interface{} {
 	aa := []interface{}{p.Address}
 	if p.ID != 0 {
@@ -14,6 +16,7 @@ func (p *ParamsDisconnectNode) Args() []interface{} {
 	return aa
 }
 
+// NodeInfo model.
 type NodeInfo struct {
 	Node      string `json:"node"`
 	Connected bool   `json:"connected"`
@@ -23,18 +26,22 @@ type NodeInfo struct {
 	} `json:"addresses"`
 }
 
+// OptsNodeInfo options.
 type OptsNodeInfo struct {
 	Node string
 }
 
+// Args convert struct into optional positional arguments.
 func (o *OptsNodeInfo) Args() []interface{} {
 	return []interface{}{o.Node}
 }
 
+// ExcessiveBlock model.
 type ExcessiveBlock struct {
 	ExcessiveBlockSize uint64 `json:"excessiveBlockSize"`
 }
 
+// NetworkTotals model.
 type NetworkTotals struct {
 	TotalBytesReceived uint64 `json:"totalbytesrecv"`
 	TotalBytesSent     uint64 `json:"totalbytessent"`
@@ -49,6 +56,7 @@ type NetworkTotals struct {
 	} `json:"uploadtarget"`
 }
 
+// NetworkInfo model.
 type NetworkInfo struct {
 	Version                uint64 `json:"version"`
 	Subversion             string `json:"subversion"`
@@ -67,7 +75,7 @@ type NetworkInfo struct {
 		Limited                   bool   `json:"limited"`
 		Reachable                 bool   `json:"reachable"`
 		Proxy                     string `json:"proxy"`
-		ProxyRandomiseCredentials bool   `json:"proxy_randomize_credentials"`
+		ProxyRandomiseCredentials bool   `json:"proxy_randomize_credentials"` // nolint:misspell // in response
 	} `json:"networks"`
 	RelayFee                        float64 `json:"relayfee"`
 	MinConsolidationFactor          uint64  `json:"minconsolidationfactor"`
@@ -83,6 +91,7 @@ type NetworkInfo struct {
 	Warnings string `json:"warnings"`
 }
 
+// PeerInfo model.
 type PeerInfo struct {
 	ID            int    `json:"id"`
 	Addr          string `json:"addr"`
@@ -148,6 +157,7 @@ type PeerInfo struct {
 	} `json:"bytesrecv_per_msg"`
 }
 
+// BannedSubnet model.
 type BannedSubnet struct {
 	Address     string `json:"address"`
 	BannedUntil uint64 `json:"banned_until"`
@@ -155,11 +165,13 @@ type BannedSubnet struct {
 	BanReason   string `json:"ban_reason"`
 }
 
+// OptsSetBan options.
 type OptsSetBan struct {
 	BanTime  uint64
 	Absolute bool
 }
 
+// Args convert struct into optional positional arguments.
 func (o *OptsSetBan) Args() []interface{} {
 	return []interface{}{o.BanTime, o.Absolute}
 }

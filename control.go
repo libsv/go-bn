@@ -7,6 +7,7 @@ import (
 	"github.com/libsv/go-bn/models"
 )
 
+// ControlClient interfaces interaction with the control sub commands on a bitcoin node.
 type ControlClient interface {
 	ActiveZMQNotifications(ctx context.Context) ([]*models.ZMQNotification, error)
 	DumpParams(ctx context.Context) ([]string, error)
@@ -17,7 +18,8 @@ type ControlClient interface {
 	Uptime(ctx context.Context) (time.Duration, error)
 }
 
-func NewControlClient(oo ...optFunc) ControlClient {
+// NewControlClient returns a client only capable of interfacing with the control sub commands on a bitcoin node.
+func NewControlClient(oo ...BitcoinClientOptFunc) ControlClient {
 	return NewNodeClient(oo...)
 }
 

@@ -11,6 +11,7 @@ type cache struct {
 	cache map[string]interface{}
 }
 
+// NewCache returns a cache wrapper around an RPC service.
 func NewCache(rpc RPC) RPC {
 	return &cache{
 		rpc:   rpc,
@@ -18,6 +19,7 @@ func NewCache(rpc RPC) RPC {
 	}
 }
 
+// Do an RPC request with cache enabled.
 func (c *cache) Do(ctx context.Context, method string, out interface{}, args ...interface{}) error {
 	return c.do(ctx, request{method: method, args: args}, out)
 }

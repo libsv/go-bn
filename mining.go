@@ -7,6 +7,7 @@ import (
 	"github.com/libsv/go-bn/models"
 )
 
+// MiningClient interfaces interaction with the mining sub commands on a bitcoin node.
 type MiningClient interface {
 	BlockTemplate(ctx context.Context, opts *models.BlockTemplateRequest) (*models.BlockTemplate, error)
 	MiningCandidate(ctx context.Context, opts *models.OptsMiningCandidate) (*models.MiningCandidate, error)
@@ -18,7 +19,8 @@ type MiningClient interface {
 	VerifyBlockCandidate(ctx context.Context, block *bc.Block, params *models.OptsSubmitBlock) (string, error)
 }
 
-func NewMiningClient(oo ...optFunc) MiningClient {
+// NewMiningClient returns a client only capable of interfacing with the mining sub commands on a bitcoin node.
+func NewMiningClient(oo ...BitcoinClientOptFunc) MiningClient {
 	return NewNodeClient(oo...)
 }
 
@@ -27,7 +29,8 @@ func (c *client) BlockTemplate(ctx context.Context, opts *models.BlockTemplateRe
 	return &resp, c.rpc.Do(ctx, "getblocktemplate", &resp, c.argsFor(opts)...)
 }
 
-func (c *client) MiningCandidate(ctx context.Context, opts *models.OptsMiningCandidate) (*models.MiningCandidate, error) {
+func (c *client) MiningCandidate(ctx context.Context,
+	opts *models.OptsMiningCandidate) (*models.MiningCandidate, error) {
 	var resp models.MiningCandidate
 	return &resp, c.rpc.Do(ctx, "getminingcandidate", &resp, c.argsFor(opts)...)
 }
@@ -58,7 +61,8 @@ func (c *client) SubmitMiningSolution(ctx context.Context, solution *models.Mini
 	return resp, c.rpc.Do(ctx, "submitminingsolution", &resp, solution)
 }
 
-func (c *client) VerifyBlockCandidate(ctx context.Context, block *bc.Block, params *models.OptsSubmitBlock) (string, error) {
+func (c *client) VerifyBlockCandidate(ctx context.Context, block *bc.Block,
+	params *models.OptsSubmitBlock) (string, error) {
 	var resp string
 	return resp, c.rpc.Do(ctx, "verifyblockcandidate", &resp, c.argsFor(params, block.String())...)
 }

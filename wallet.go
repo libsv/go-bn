@@ -9,6 +9,7 @@ import (
 	"github.com/libsv/go-bt/v2"
 )
 
+// WalletClient interfaces interaction with the wallet sub commands on a bitcoin node.
 type WalletClient interface {
 	AbandonTransaction(ctx context.Context, txID string) error
 	AddMultiSigAddress(ctx context.Context, n int, keys ...string) (string, error)
@@ -26,7 +27,8 @@ type WalletClient interface {
 	Transaction(ctx context.Context, txID string) (*models.Transaction, error)
 	ImportAddress(ctx context.Context, address string, opts *models.OptsImportAddress) error
 	WalletInfo(ctx context.Context) (*models.WalletInfo, error)
-	ImportMulti(ctx context.Context, reqs []models.ImportMultiRequest, opts *models.OptsImportMulti) ([]*models.ImportMulti, error)
+	ImportMulti(ctx context.Context, reqs []models.ImportMultiRequest,
+		opts *models.OptsImportMulti) ([]*models.ImportMulti, error)
 	ImportPrivateKey(ctx context.Context, w *wif.WIF, opts *models.OptsImportPrivateKey) error
 	ImportPrunedFunds(ctx context.Context, tx *bt.Tx, txOutProof string) error
 	ImportPublicKey(ctx context.Context, publicKey string, opts *models.OptsImportPublicKey) error
@@ -54,6 +56,11 @@ type WalletClient interface {
 	WalletPhassphrase(ctx context.Context, passphrase string, timeout int) error
 	WalletPhassphraseChange(ctx context.Context, oldPassphrase, newPassphrase string) error
 	WalletLock(ctx context.Context) error
+}
+
+// NewWalletClient returns a client only capable of interfacing with the wallet sub commands on a bitcoin node.
+func NewWalletClient(oo ...BitcoinClientOptFunc) WalletClient {
+	return NewNodeClient(oo...)
 }
 
 func (c *client) AbandonTransaction(ctx context.Context, txID string) error {
@@ -139,7 +146,8 @@ func (c *client) WalletInfo(ctx context.Context) (*models.WalletInfo, error) {
 	return &resp, c.rpc.Do(ctx, "getwalletinfo", &resp)
 }
 
-func (c *client) ImportMulti(ctx context.Context, reqs []models.ImportMultiRequest, opts *models.OptsImportMulti) ([]*models.ImportMulti, error) {
+func (c *client) ImportMulti(ctx context.Context, reqs []models.ImportMultiRequest,
+	opts *models.OptsImportMulti) ([]*models.ImportMulti, error) {
 	var resp []*models.ImportMulti
 	return resp, c.rpc.Do(ctx, "importmulti", &resp, c.argsFor(opts, reqs)...)
 }
@@ -175,12 +183,14 @@ func (c *client) ListLockUnspent(ctx context.Context) ([]*models.LockUnspent, er
 	return resp, c.rpc.Do(ctx, "listlockunspent", &resp)
 }
 
-func (c *client) ListReceivedByAccount(ctx context.Context, opts *models.OptsListReceivedBy) ([]*models.ReceivedByAccount, error) {
+func (c *client) ListReceivedByAccount(ctx context.Context,
+	opts *models.OptsListReceivedBy) ([]*models.ReceivedByAccount, error) {
 	var resp []*models.ReceivedByAccount
 	return resp, c.rpc.Do(ctx, "listreceivedbyaccount", &resp, c.argsFor(opts)...)
 }
 
-func (c *client) ListReceivedByAddress(ctx context.Context, opts *models.OptsListReceivedBy) ([]*models.ReceivedByAddress, error) {
+func (c *client) ListReceivedByAddress(ctx context.Context,
+	opts *models.OptsListReceivedBy) ([]*models.ReceivedByAddress, error) {
 	var resp []*models.ReceivedByAddress
 	return resp, c.rpc.Do(ctx, "listreceivedbyaddress", &resp, c.argsFor(opts)...)
 }
@@ -190,7 +200,8 @@ func (c *client) ListSinceBlock(ctx context.Context, opts *models.OptsListSinceB
 	return &resp, c.rpc.Do(ctx, "listsinceblock", &resp, c.argsFor(opts)...)
 }
 
-func (c *client) ListTransactions(ctx context.Context, opts *models.OptsListTransactions) ([]*models.Transaction, error) {
+func (c *client) ListTransactions(ctx context.Context,
+	opts *models.OptsListTransactions) ([]*models.Transaction, error) {
 	var resp []*models.Transaction
 	return resp, c.rpc.Do(ctx, "listtransactions", &resp, c.argsFor(opts)...)
 }
@@ -220,17 +231,20 @@ func (c *client) RemovePrunedFunds(ctx context.Context, txID string) error {
 	return c.rpc.Do(ctx, "removeprunedfunds", nil, txID)
 }
 
-func (c *client) SendFrom(ctx context.Context, from, to string, amount float64, opts *models.OptsSendFrom) (string, error) {
+func (c *client) SendFrom(ctx context.Context, from, to string, amount float64,
+	opts *models.OptsSendFrom) (string, error) {
 	var resp string
 	return resp, c.rpc.Do(ctx, "sendfrom", &resp, c.argsFor(opts, from, to, amount)...)
 }
 
-func (c *client) SendMany(ctx context.Context, from string, amounts map[string]float64, opts *models.OptsSendMany) (string, error) {
+func (c *client) SendMany(ctx context.Context, from string, amounts map[string]float64,
+	opts *models.OptsSendMany) (string, error) {
 	var resp string
 	return resp, c.rpc.Do(ctx, "sendmany", &resp, c.argsFor(opts, from, amounts)...)
 }
 
-func (c *client) SendToAddress(ctx context.Context, address string, amount float64, opts *models.OptsSendToAddress) (string, error) {
+func (c *client) SendToAddress(ctx context.Context, address string, amount float64,
+	opts *models.OptsSendToAddress) (string, error) {
 	var resp string
 	return resp, c.rpc.Do(ctx, "sendtoaddress", &resp, c.argsFor(opts, address, amount)...)
 }

@@ -5,22 +5,26 @@ import (
 	"github.com/libsv/go-bt/v2"
 )
 
+// InternalFundRawTransaction the true to form fundrawtransaction response.
 type InternalFundRawTransaction struct {
 	*models.FundRawTransaction
 	Hex string `json:"hex"`
 }
 
+// PostProcess an RPC response.
 func (i *InternalFundRawTransaction) PostProcess() error {
 	var err error
 	i.Tx, err = bt.NewTxFromString(i.Hex)
 	return err
 }
 
+// InternalSignRawTransaction the true to form signrawtransaction response.
 type InternalSignRawTransaction struct {
 	Hex string `json:"hex"`
 	*models.SignedRawTransaction
 }
 
+// PostProcess an RPC response.
 func (i *InternalSignRawTransaction) PostProcess() error {
 	var err error
 	i.Tx, err = bt.NewTxFromString(i.Hex)

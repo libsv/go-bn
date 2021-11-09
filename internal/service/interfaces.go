@@ -5,6 +5,7 @@ import (
 	"fmt"
 )
 
+// RPC interface with an rpc server.
 type RPC interface {
 	Do(ctx context.Context, method string, out interface{}, args ...interface{}) error
 }

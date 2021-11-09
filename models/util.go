@@ -1,10 +1,12 @@
 package models
 
+// MultiSig model.
 type MultiSig struct {
 	Address      string `json:"address"`
 	RedeemScript string `json:"redeemScript"`
 }
 
+// ValidateAddress model.
 type ValidateAddress struct {
 	IsValid       bool   `json:"isvalid"`
 	Address       string `json:"address"`

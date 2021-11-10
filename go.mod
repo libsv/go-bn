@@ -1,12 +1,16 @@
-module github.com/ordishs/go-bitcoin
+module github.com/libsv/go-bn
 
-go 1.13
+go 1.17
 
 require (
-	bitbucket.org/simon_ordish/cryptolib v1.0.46
-	github.com/btcsuite/btcd v0.21.0-beta // indirect
-	github.com/go-zeromq/zmq4 v0.13.0
-	github.com/patrickmn/go-cache v2.1.0+incompatible
-	golang.org/x/crypto v0.0.0-20201117144127-c1f2f97bffc9 // indirect
-	golang.org/x/sync v0.0.0-20201020160332-67f06af15bc9
+	github.com/libsv/go-bc v0.1.7
+	github.com/libsv/go-bk v0.1.4
+	github.com/libsv/go-bt/v2 v2.0.0-beta.10.0.20211109151324-845515044528
+	github.com/pkg/errors v0.9.1
+	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c
+)
+
+require (
+	github.com/theflyingcodr/govalidator v0.0.2 // indirect
+	golang.org/x/crypto v0.0.0-20210921155107-089bfa567519 // indirect
 )

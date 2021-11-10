@@ -37,7 +37,7 @@ func (c *client) CreateRawTransaction(ctx context.Context, utxos bt.UTXOs,
 
 func (c *client) FundRawTransaction(ctx context.Context, tx *bt.Tx,
 	opts *models.OptsFundRawTransaction) (*models.FundRawTransaction, error) {
-	var resp imodels.InternalFundRawTransaction
+	resp := imodels.InternalFundRawTransaction{FundRawTransaction: &models.FundRawTransaction{}}
 	return resp.FundRawTransaction, c.rpc.Do(ctx, "fundrawtransaction", &resp, c.argsFor(opts, tx.String())...)
 }
 

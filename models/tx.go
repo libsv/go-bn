@@ -3,6 +3,7 @@ package models
 import (
 	"encoding/json"
 
+	"github.com/libsv/go-bn/internal/util"
 	"github.com/libsv/go-bt/v2"
 	"github.com/libsv/go-bt/v2/bscript"
 	"github.com/libsv/go-bt/v2/sighash"
@@ -81,14 +82,14 @@ func (p *ParamsCreateRawTransaction) Args() []interface{} {
 	for _, o := range p.Outputs {
 		pkh, err := o.LockingScript.PublicKeyHash()
 		if err != nil {
-			outputs["invalid locking script"] = float64(o.Satoshis) / 100000000
+			outputs["invalid locking script"] = util.BSVToSatoshis(o.Satoshis)
 			continue
 		}
 		addr, err := bscript.NewAddressFromPublicKeyHash(pkh, p.mainnet)
 		if err != nil {
-			outputs["invalid locking script"] = float64(o.Satoshis) / 100000000
+			outputs["invalid locking script"] = util.BSVToSatoshis(o.Satoshis)
 		}
-		outputs[addr.AddressString] = float64(o.Satoshis) / 100000000
+		outputs[addr.AddressString] = util.BSVToSatoshis(o.Satoshis)
 	}
 
 	return []interface{}{outputs}
@@ -101,8 +102,8 @@ func (p *ParamsCreateRawTransaction) SetIsMainnet(b bool) {
 
 // FundRawTransaction model.
 type FundRawTransaction struct {
-	Fee            uint64 `json:"fee"`
-	ChangePosition int    `json:"changeposition"`
+	Fee            uint64
+	ChangePosition int `json:"changeposition"`
 	Tx             *bt.Tx
 }
 

@@ -38,6 +38,9 @@ func main() {
 			}
 
 			bb, err := json.MarshalIndent(signedTx.Tx, "", "  ")
+			if err != nil {
+				panic(err)
+			}
 			fmt.Println(string(bb))
 		}()
 	}

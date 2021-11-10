@@ -49,7 +49,7 @@ var _ bn.NodeClient = &NodeClientMock{}
 // 			BackupWalletFunc: func(ctx context.Context, dest string) error {
 // 				panic("mock out the BackupWallet method")
 // 			},
-// 			BalanceFunc: func(ctx context.Context, opts *models.OptsBalance) (float64, error) {
+// 			BalanceFunc: func(ctx context.Context, opts *models.OptsBalance) (uint64, error) {
 // 				panic("mock out the Balance method")
 // 			},
 // 			BestBlockHashFunc: func(ctx context.Context) (string, error) {
@@ -178,7 +178,7 @@ var _ bn.NodeClient = &NodeClientMock{}
 // 			LegacyMerkleProofFunc: func(ctx context.Context, txID string, opts *models.OptsLegacyMerkleProof) (*models.LegacyMerkleProof, error) {
 // 				panic("mock out the LegacyMerkleProof method")
 // 			},
-// 			ListAccountsFunc: func(ctx context.Context, opts *models.OptsListAccounts) (map[string]float64, error) {
+// 			ListAccountsFunc: func(ctx context.Context, opts *models.OptsListAccounts) (map[string]uint64, error) {
 // 				panic("mock out the ListAccounts method")
 // 			},
 // 			ListBannedFunc: func(ctx context.Context) ([]*models.BannedSubnet, error) {
@@ -235,7 +235,7 @@ var _ bn.NodeClient = &NodeClientMock{}
 // 			MiningInfoFunc: func(ctx context.Context) (*models.MiningInfo, error) {
 // 				panic("mock out the MiningInfo method")
 // 			},
-// 			MoveFunc: func(ctx context.Context, from string, to string, amount float64, opts *models.OptsMove) (bool, error) {
+// 			MoveFunc: func(ctx context.Context, from string, to string, amount uint64, opts *models.OptsMove) (bool, error) {
 // 				panic("mock out the Move method")
 // 			},
 // 			NetworkHashPSFunc: func(ctx context.Context, opts *models.OptsNetworkHashPS) (uint64, error) {
@@ -292,22 +292,22 @@ var _ bn.NodeClient = &NodeClientMock{}
 // 			RebuildJournalFunc: func(ctx context.Context) error {
 // 				panic("mock out the RebuildJournal method")
 // 			},
-// 			ReceivedByAddressFunc: func(ctx context.Context, address string) (float64, error) {
+// 			ReceivedByAddressFunc: func(ctx context.Context, address string) (uint64, error) {
 // 				panic("mock out the ReceivedByAddress method")
 // 			},
 // 			RemovePrunedFundsFunc: func(ctx context.Context, txID string) error {
 // 				panic("mock out the RemovePrunedFunds method")
 // 			},
-// 			SendFromFunc: func(ctx context.Context, from string, to string, amount float64, opts *models.OptsSendFrom) (string, error) {
+// 			SendFromFunc: func(ctx context.Context, from string, to string, amount uint64, opts *models.OptsSendFrom) (string, error) {
 // 				panic("mock out the SendFrom method")
 // 			},
-// 			SendManyFunc: func(ctx context.Context, from string, amounts map[string]float64, opts *models.OptsSendMany) (string, error) {
+// 			SendManyFunc: func(ctx context.Context, from string, amounts map[string]uint64, opts *models.OptsSendMany) (string, error) {
 // 				panic("mock out the SendMany method")
 // 			},
 // 			SendRawTransactionFunc: func(ctx context.Context, tx *bt.Tx, opts *models.OptsSendRawTransaction) (string, error) {
 // 				panic("mock out the SendRawTransaction method")
 // 			},
-// 			SendToAddressFunc: func(ctx context.Context, address string, amount float64, opts *models.OptsSendToAddress) (string, error) {
+// 			SendToAddressFunc: func(ctx context.Context, address string, amount uint64, opts *models.OptsSendToAddress) (string, error) {
 // 				panic("mock out the SendToAddress method")
 // 			},
 // 			SetAccountFunc: func(ctx context.Context, address string, account string) error {
@@ -325,7 +325,7 @@ var _ bn.NodeClient = &NodeClientMock{}
 // 			SetNetworkActiveFunc: func(ctx context.Context, enabled bool) error {
 // 				panic("mock out the SetNetworkActive method")
 // 			},
-// 			SetTxFeeFunc: func(ctx context.Context, amount float64) (bool, error) {
+// 			SetTxFeeFunc: func(ctx context.Context, amount uint64) (bool, error) {
 // 				panic("mock out the SetTxFee method")
 // 			},
 // 			SetTxPropagationFrequencyFunc: func(ctx context.Context, frequency uint64) error {
@@ -355,7 +355,7 @@ var _ bn.NodeClient = &NodeClientMock{}
 // 			TransactionFunc: func(ctx context.Context, txID string) (*models.Transaction, error) {
 // 				panic("mock out the Transaction method")
 // 			},
-// 			UnconfirmedBalanceFunc: func(ctx context.Context) (float64, error) {
+// 			UnconfirmedBalanceFunc: func(ctx context.Context) (uint64, error) {
 // 				panic("mock out the UnconfirmedBalance method")
 // 			},
 // 			UptimeFunc: func(ctx context.Context) (time.Duration, error) {
@@ -417,7 +417,7 @@ type NodeClientMock struct {
 	BackupWalletFunc func(ctx context.Context, dest string) error
 
 	// BalanceFunc mocks the Balance method.
-	BalanceFunc func(ctx context.Context, opts *models.OptsBalance) (float64, error)
+	BalanceFunc func(ctx context.Context, opts *models.OptsBalance) (uint64, error)
 
 	// BestBlockHashFunc mocks the BestBlockHash method.
 	BestBlockHashFunc func(ctx context.Context) (string, error)
@@ -546,7 +546,7 @@ type NodeClientMock struct {
 	LegacyMerkleProofFunc func(ctx context.Context, txID string, opts *models.OptsLegacyMerkleProof) (*models.LegacyMerkleProof, error)
 
 	// ListAccountsFunc mocks the ListAccounts method.
-	ListAccountsFunc func(ctx context.Context, opts *models.OptsListAccounts) (map[string]float64, error)
+	ListAccountsFunc func(ctx context.Context, opts *models.OptsListAccounts) (map[string]uint64, error)
 
 	// ListBannedFunc mocks the ListBanned method.
 	ListBannedFunc func(ctx context.Context) ([]*models.BannedSubnet, error)
@@ -603,7 +603,7 @@ type NodeClientMock struct {
 	MiningInfoFunc func(ctx context.Context) (*models.MiningInfo, error)
 
 	// MoveFunc mocks the Move method.
-	MoveFunc func(ctx context.Context, from string, to string, amount float64, opts *models.OptsMove) (bool, error)
+	MoveFunc func(ctx context.Context, from string, to string, amount uint64, opts *models.OptsMove) (bool, error)
 
 	// NetworkHashPSFunc mocks the NetworkHashPS method.
 	NetworkHashPSFunc func(ctx context.Context, opts *models.OptsNetworkHashPS) (uint64, error)
@@ -660,22 +660,22 @@ type NodeClientMock struct {
 	RebuildJournalFunc func(ctx context.Context) error
 
 	// ReceivedByAddressFunc mocks the ReceivedByAddress method.
-	ReceivedByAddressFunc func(ctx context.Context, address string) (float64, error)
+	ReceivedByAddressFunc func(ctx context.Context, address string) (uint64, error)
 
 	// RemovePrunedFundsFunc mocks the RemovePrunedFunds method.
 	RemovePrunedFundsFunc func(ctx context.Context, txID string) error
 
 	// SendFromFunc mocks the SendFrom method.
-	SendFromFunc func(ctx context.Context, from string, to string, amount float64, opts *models.OptsSendFrom) (string, error)
+	SendFromFunc func(ctx context.Context, from string, to string, amount uint64, opts *models.OptsSendFrom) (string, error)
 
 	// SendManyFunc mocks the SendMany method.
-	SendManyFunc func(ctx context.Context, from string, amounts map[string]float64, opts *models.OptsSendMany) (string, error)
+	SendManyFunc func(ctx context.Context, from string, amounts map[string]uint64, opts *models.OptsSendMany) (string, error)
 
 	// SendRawTransactionFunc mocks the SendRawTransaction method.
 	SendRawTransactionFunc func(ctx context.Context, tx *bt.Tx, opts *models.OptsSendRawTransaction) (string, error)
 
 	// SendToAddressFunc mocks the SendToAddress method.
-	SendToAddressFunc func(ctx context.Context, address string, amount float64, opts *models.OptsSendToAddress) (string, error)
+	SendToAddressFunc func(ctx context.Context, address string, amount uint64, opts *models.OptsSendToAddress) (string, error)
 
 	// SetAccountFunc mocks the SetAccount method.
 	SetAccountFunc func(ctx context.Context, address string, account string) error
@@ -693,7 +693,7 @@ type NodeClientMock struct {
 	SetNetworkActiveFunc func(ctx context.Context, enabled bool) error
 
 	// SetTxFeeFunc mocks the SetTxFee method.
-	SetTxFeeFunc func(ctx context.Context, amount float64) (bool, error)
+	SetTxFeeFunc func(ctx context.Context, amount uint64) (bool, error)
 
 	// SetTxPropagationFrequencyFunc mocks the SetTxPropagationFrequency method.
 	SetTxPropagationFrequencyFunc func(ctx context.Context, frequency uint64) error
@@ -723,7 +723,7 @@ type NodeClientMock struct {
 	TransactionFunc func(ctx context.Context, txID string) (*models.Transaction, error)
 
 	// UnconfirmedBalanceFunc mocks the UnconfirmedBalance method.
-	UnconfirmedBalanceFunc func(ctx context.Context) (float64, error)
+	UnconfirmedBalanceFunc func(ctx context.Context) (uint64, error)
 
 	// UptimeFunc mocks the Uptime method.
 	UptimeFunc func(ctx context.Context) (time.Duration, error)
@@ -1255,7 +1255,7 @@ type NodeClientMock struct {
 			// To is the to argument value.
 			To string
 			// Amount is the amount argument value.
-			Amount float64
+			Amount uint64
 			// Opts is the opts argument value.
 			Opts *models.OptsMove
 		}
@@ -1394,7 +1394,7 @@ type NodeClientMock struct {
 			// To is the to argument value.
 			To string
 			// Amount is the amount argument value.
-			Amount float64
+			Amount uint64
 			// Opts is the opts argument value.
 			Opts *models.OptsSendFrom
 		}
@@ -1405,7 +1405,7 @@ type NodeClientMock struct {
 			// From is the from argument value.
 			From string
 			// Amounts is the amounts argument value.
-			Amounts map[string]float64
+			Amounts map[string]uint64
 			// Opts is the opts argument value.
 			Opts *models.OptsSendMany
 		}
@@ -1425,7 +1425,7 @@ type NodeClientMock struct {
 			// Address is the address argument value.
 			Address string
 			// Amount is the amount argument value.
-			Amount float64
+			Amount uint64
 			// Opts is the opts argument value.
 			Opts *models.OptsSendToAddress
 		}
@@ -1475,7 +1475,7 @@ type NodeClientMock struct {
 			// Ctx is the ctx argument value.
 			Ctx context.Context
 			// Amount is the amount argument value.
-			Amount float64
+			Amount uint64
 		}
 		// SetTxPropagationFrequency holds details about calls to the SetTxPropagationFrequency method.
 		SetTxPropagationFrequency []struct {
@@ -2022,7 +2022,7 @@ func (mock *NodeClientMock) BackupWalletCalls() []struct {
 }
 
 // Balance calls BalanceFunc.
-func (mock *NodeClientMock) Balance(ctx context.Context, opts *models.OptsBalance) (float64, error) {
+func (mock *NodeClientMock) Balance(ctx context.Context, opts *models.OptsBalance) (uint64, error) {
 	if mock.BalanceFunc == nil {
 		panic("NodeClientMock.BalanceFunc: method is nil but NodeClient.Balance was just called")
 	}
@@ -3535,7 +3535,7 @@ func (mock *NodeClientMock) LegacyMerkleProofCalls() []struct {
 }
 
 // ListAccounts calls ListAccountsFunc.
-func (mock *NodeClientMock) ListAccounts(ctx context.Context, opts *models.OptsListAccounts) (map[string]float64, error) {
+func (mock *NodeClientMock) ListAccounts(ctx context.Context, opts *models.OptsListAccounts) (map[string]uint64, error) {
 	if mock.ListAccountsFunc == nil {
 		panic("NodeClientMock.ListAccountsFunc: method is nil but NodeClient.ListAccounts was just called")
 	}
@@ -4192,7 +4192,7 @@ func (mock *NodeClientMock) MiningInfoCalls() []struct {
 }
 
 // Move calls MoveFunc.
-func (mock *NodeClientMock) Move(ctx context.Context, from string, to string, amount float64, opts *models.OptsMove) (bool, error) {
+func (mock *NodeClientMock) Move(ctx context.Context, from string, to string, amount uint64, opts *models.OptsMove) (bool, error) {
 	if mock.MoveFunc == nil {
 		panic("NodeClientMock.MoveFunc: method is nil but NodeClient.Move was just called")
 	}
@@ -4200,7 +4200,7 @@ func (mock *NodeClientMock) Move(ctx context.Context, from string, to string, am
 		Ctx    context.Context
 		From   string
 		To     string
-		Amount float64
+		Amount uint64
 		Opts   *models.OptsMove
 	}{
 		Ctx:    ctx,
@@ -4222,14 +4222,14 @@ func (mock *NodeClientMock) MoveCalls() []struct {
 	Ctx    context.Context
 	From   string
 	To     string
-	Amount float64
+	Amount uint64
 	Opts   *models.OptsMove
 } {
 	var calls []struct {
 		Ctx    context.Context
 		From   string
 		To     string
-		Amount float64
+		Amount uint64
 		Opts   *models.OptsMove
 	}
 	mock.lockMove.RLock()
@@ -4841,7 +4841,7 @@ func (mock *NodeClientMock) RebuildJournalCalls() []struct {
 }
 
 // ReceivedByAddress calls ReceivedByAddressFunc.
-func (mock *NodeClientMock) ReceivedByAddress(ctx context.Context, address string) (float64, error) {
+func (mock *NodeClientMock) ReceivedByAddress(ctx context.Context, address string) (uint64, error) {
 	if mock.ReceivedByAddressFunc == nil {
 		panic("NodeClientMock.ReceivedByAddressFunc: method is nil but NodeClient.ReceivedByAddress was just called")
 	}
@@ -4911,7 +4911,7 @@ func (mock *NodeClientMock) RemovePrunedFundsCalls() []struct {
 }
 
 // SendFrom calls SendFromFunc.
-func (mock *NodeClientMock) SendFrom(ctx context.Context, from string, to string, amount float64, opts *models.OptsSendFrom) (string, error) {
+func (mock *NodeClientMock) SendFrom(ctx context.Context, from string, to string, amount uint64, opts *models.OptsSendFrom) (string, error) {
 	if mock.SendFromFunc == nil {
 		panic("NodeClientMock.SendFromFunc: method is nil but NodeClient.SendFrom was just called")
 	}
@@ -4919,7 +4919,7 @@ func (mock *NodeClientMock) SendFrom(ctx context.Context, from string, to string
 		Ctx    context.Context
 		From   string
 		To     string
-		Amount float64
+		Amount uint64
 		Opts   *models.OptsSendFrom
 	}{
 		Ctx:    ctx,
@@ -4941,14 +4941,14 @@ func (mock *NodeClientMock) SendFromCalls() []struct {
 	Ctx    context.Context
 	From   string
 	To     string
-	Amount float64
+	Amount uint64
 	Opts   *models.OptsSendFrom
 } {
 	var calls []struct {
 		Ctx    context.Context
 		From   string
 		To     string
-		Amount float64
+		Amount uint64
 		Opts   *models.OptsSendFrom
 	}
 	mock.lockSendFrom.RLock()
@@ -4958,14 +4958,14 @@ func (mock *NodeClientMock) SendFromCalls() []struct {
 }
 
 // SendMany calls SendManyFunc.
-func (mock *NodeClientMock) SendMany(ctx context.Context, from string, amounts map[string]float64, opts *models.OptsSendMany) (string, error) {
+func (mock *NodeClientMock) SendMany(ctx context.Context, from string, amounts map[string]uint64, opts *models.OptsSendMany) (string, error) {
 	if mock.SendManyFunc == nil {
 		panic("NodeClientMock.SendManyFunc: method is nil but NodeClient.SendMany was just called")
 	}
 	callInfo := struct {
 		Ctx     context.Context
 		From    string
-		Amounts map[string]float64
+		Amounts map[string]uint64
 		Opts    *models.OptsSendMany
 	}{
 		Ctx:     ctx,
@@ -4985,13 +4985,13 @@ func (mock *NodeClientMock) SendMany(ctx context.Context, from string, amounts m
 func (mock *NodeClientMock) SendManyCalls() []struct {
 	Ctx     context.Context
 	From    string
-	Amounts map[string]float64
+	Amounts map[string]uint64
 	Opts    *models.OptsSendMany
 } {
 	var calls []struct {
 		Ctx     context.Context
 		From    string
-		Amounts map[string]float64
+		Amounts map[string]uint64
 		Opts    *models.OptsSendMany
 	}
 	mock.lockSendMany.RLock()
@@ -5040,14 +5040,14 @@ func (mock *NodeClientMock) SendRawTransactionCalls() []struct {
 }
 
 // SendToAddress calls SendToAddressFunc.
-func (mock *NodeClientMock) SendToAddress(ctx context.Context, address string, amount float64, opts *models.OptsSendToAddress) (string, error) {
+func (mock *NodeClientMock) SendToAddress(ctx context.Context, address string, amount uint64, opts *models.OptsSendToAddress) (string, error) {
 	if mock.SendToAddressFunc == nil {
 		panic("NodeClientMock.SendToAddressFunc: method is nil but NodeClient.SendToAddress was just called")
 	}
 	callInfo := struct {
 		Ctx     context.Context
 		Address string
-		Amount  float64
+		Amount  uint64
 		Opts    *models.OptsSendToAddress
 	}{
 		Ctx:     ctx,
@@ -5067,13 +5067,13 @@ func (mock *NodeClientMock) SendToAddress(ctx context.Context, address string, a
 func (mock *NodeClientMock) SendToAddressCalls() []struct {
 	Ctx     context.Context
 	Address string
-	Amount  float64
+	Amount  uint64
 	Opts    *models.OptsSendToAddress
 } {
 	var calls []struct {
 		Ctx     context.Context
 		Address string
-		Amount  float64
+		Amount  uint64
 		Opts    *models.OptsSendToAddress
 	}
 	mock.lockSendToAddress.RLock()
@@ -5270,13 +5270,13 @@ func (mock *NodeClientMock) SetNetworkActiveCalls() []struct {
 }
 
 // SetTxFee calls SetTxFeeFunc.
-func (mock *NodeClientMock) SetTxFee(ctx context.Context, amount float64) (bool, error) {
+func (mock *NodeClientMock) SetTxFee(ctx context.Context, amount uint64) (bool, error) {
 	if mock.SetTxFeeFunc == nil {
 		panic("NodeClientMock.SetTxFeeFunc: method is nil but NodeClient.SetTxFee was just called")
 	}
 	callInfo := struct {
 		Ctx    context.Context
-		Amount float64
+		Amount uint64
 	}{
 		Ctx:    ctx,
 		Amount: amount,
@@ -5292,11 +5292,11 @@ func (mock *NodeClientMock) SetTxFee(ctx context.Context, amount float64) (bool,
 //     len(mockedNodeClient.SetTxFeeCalls())
 func (mock *NodeClientMock) SetTxFeeCalls() []struct {
 	Ctx    context.Context
-	Amount float64
+	Amount uint64
 } {
 	var calls []struct {
 		Ctx    context.Context
-		Amount float64
+		Amount uint64
 	}
 	mock.lockSetTxFee.RLock()
 	calls = mock.calls.SetTxFee
@@ -5628,7 +5628,7 @@ func (mock *NodeClientMock) TransactionCalls() []struct {
 }
 
 // UnconfirmedBalance calls UnconfirmedBalanceFunc.
-func (mock *NodeClientMock) UnconfirmedBalance(ctx context.Context) (float64, error) {
+func (mock *NodeClientMock) UnconfirmedBalance(ctx context.Context) (uint64, error) {
 	if mock.UnconfirmedBalanceFunc == nil {
 		panic("NodeClientMock.UnconfirmedBalanceFunc: method is nil but NodeClient.UnconfirmedBalance was just called")
 	}

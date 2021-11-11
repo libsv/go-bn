@@ -159,11 +159,11 @@ type OptsSignRawTransaction struct {
 // Args convert struct into optional positional arguments.
 func (o *OptsSignRawTransaction) Args() []interface{} {
 	aa := []interface{}{[]interface{}{}, []interface{}{}}
-	if o.From != nil && len(o.From) > 0 {
+	if o.From != nil {
 		aa[0] = o.From.NodeJSON()
 	}
 	if o.PrivateKeys != nil && len(o.PrivateKeys) > 0 {
-		aa[0] = o.PrivateKeys
+		aa[1] = o.PrivateKeys
 	}
 	return append(aa, o.SigHashType.String())
 }

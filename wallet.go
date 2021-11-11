@@ -36,7 +36,6 @@ type WalletClient interface {
 	ImportWallet(ctx context.Context, filename string) error
 	KeypoolRefill(ctx context.Context, opts *models.OptsKeypoolRefill) error
 	ListAccounts(ctx context.Context, opts *models.OptsListAccounts) (map[string]uint64, error)
-	// List address groupings
 	ListLockUnspent(ctx context.Context) ([]*models.LockUnspent, error)
 	ListReceivedByAccount(ctx context.Context, opts *models.OptsListReceivedBy) ([]*models.ReceivedByAccount, error)
 	ListReceivedByAddress(ctx context.Context, opts *models.OptsListReceivedBy) ([]*models.ReceivedByAddress, error)

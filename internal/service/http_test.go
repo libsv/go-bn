@@ -79,7 +79,7 @@ func TestRPC_Do_SingleFlight(t *testing.T) {
 			var timesCalled int32
 			svr := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 				atomic.AddInt32(&timesCalled, 1)
-				time.Sleep(50 * time.Millisecond)
+				time.Sleep(1 * time.Second)
 
 				bb, err := json.Marshal(models.Response{
 					Result: "ohiya",

@@ -42,6 +42,13 @@ func NewNodeClient(oo ...BitcoinClientOptFunc) NodeClient {
 		o(opts)
 	}
 
+	if opts.rpc != nil {
+		return &client{
+			rpc:       opts.rpc,
+			isMainnet: opts.isMainnet,
+		}
+	}
+
 	rpc := service.NewRPC(&config.RPC{
 		Username: opts.username,
 		Password: opts.password,

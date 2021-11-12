@@ -1,6 +1,10 @@
 package bn
 
-import "time"
+import (
+	"time"
+
+	"github.com/libsv/go-bn/internal/service"
+)
 
 // BitcoinClientOptFunc for setting bitcoin client options.
 type BitcoinClientOptFunc func(c *clientOpts)
@@ -8,6 +12,7 @@ type BitcoinClientOptFunc func(c *clientOpts)
 type clientOpts struct {
 	timeout   time.Duration
 	host      string
+	rpc       service.RPC
 	username  string
 	password  string
 	cache     bool
@@ -47,5 +52,12 @@ func WithCreds(username, password string) BitcoinClientOptFunc {
 func WithMainnet() BitcoinClientOptFunc {
 	return func(c *clientOpts) {
 		c.isMainnet = true
+	}
+}
+
+// WithCustomRPC set a custom RPC client.
+func WithCustomRPC(rpc service.RPC) BitcoinClientOptFunc {
+	return func(c *clientOpts) {
+		c.rpc = rpc
 	}
 }

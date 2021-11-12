@@ -1,6 +1,10 @@
 package zmq
 
-import "errors"
+import (
+	"context"
+
+	"github.com/go-zeromq/zmq4"
+)
 
 type nodeMqCfg struct {
 	host           string
@@ -9,11 +13,13 @@ type nodeMqCfg struct {
 	optionValue    string
 	allowOverwrite bool
 	errorFn        ErrorFunc
+	ctx            context.Context
+	zmqSocket      zmq4.Socket
 }
 
 func (c *nodeMqCfg) validate() error {
 	if c.host == "" {
-		return errors.New("host cannot be empty")
+		return ErrHostEmpty
 	}
 
 	return nil
@@ -63,5 +69,19 @@ func WithSubscriptionOverwrite() NodeMQOptFunc {
 func WithErrorHandler(fn ErrorFunc) NodeMQOptFunc {
 	return func(o *nodeMqCfg) {
 		o.errorFn = fn
+	}
+}
+
+// WithContext set the context.Context for the 0MQ socket.
+func WithContext(ctx context.Context) NodeMQOptFunc {
+	return func(o *nodeMqCfg) {
+		o.ctx = ctx
+	}
+}
+
+// WithCustomZMQSocket set a custom zmq4.Socket. If unset, a default will be used.
+func WithCustomZMQSocket(z zmq4.Socket) NodeMQOptFunc {
+	return func(o *nodeMqCfg) {
+		o.zmqSocket = z
 	}
 }

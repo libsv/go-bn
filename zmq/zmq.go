@@ -2,6 +2,7 @@ package zmq
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"os"
 	"sync"
@@ -23,14 +24,14 @@ const (
 	TopicHashTx                  Topic = "hashtx"
 	TopicHashBlock               Topic = "hashblock"
 	TopicInvalidTx               Topic = "invalidtx"
-	TopicDicardFromMempool       Topic = "discardfrommempool"
+	TopicDiscardFromMempool      Topic = "discardfrommempool"
 	TopicRemovedFromMempoolBlock Topic = "removedfrommempoolblock"
 
 	TopicRawTx    Topic = "rawtx"
 	TopicRawBlock Topic = "rawblock"
 )
 
-type zmq struct {
+type nodeMq struct {
 	mu            sync.RWMutex
 	conn          zmq4.Socket
 	connected     bool
@@ -41,7 +42,7 @@ type zmq struct {
 
 // NodeMQ interfaces connecting and subscribing to a bitcoin node NodeMQ connection.
 type NodeMQ interface {
-	Connect(ctx context.Context) error
+	Connect() error
 	Subscribe(topic Topic, fn MessageFunc) error
 	Unsubscribe(topic Topic) error
 }
@@ -54,7 +55,7 @@ func NewNodeMQ(oo ...NodeMQOptFunc) NodeMQ {
 		topics: map[Topic]bool{
 			TopicHashBlock:               true,
 			TopicHashTx:                  true,
-			TopicDicardFromMempool:       true,
+			TopicDiscardFromMempool:      true,
 			TopicRemovedFromMempoolBlock: true,
 			TopicInvalidTx:               true,
 
@@ -66,58 +67,65 @@ func NewNodeMQ(oo ...NodeMQOptFunc) NodeMQ {
 		o(cfg)
 	}
 
-	return &zmq{
+	if cfg.zmqSocket == nil {
+		cfg.zmqSocket = zmq4.NewSub(cfg.ctx, zmq4.WithID(zmq4.SocketIdentity("sub")))
+	}
+
+	return &nodeMq{
 		cfg:           cfg,
 		subscriptions: make(map[Topic]MessageFunc),
 		onErrFn:       cfg.errorFn,
+		conn:          cfg.zmqSocket,
 	}
 }
 
 // Connect to the bitcoin node 0MQ.
-func (z *zmq) Connect(ctx context.Context) error {
-	if err := z.cfg.validate(); err != nil {
+func (n *nodeMq) Connect() error {
+	if err := n.cfg.validate(); err != nil {
 		return err
 	}
 
-	z.conn = zmq4.NewSub(ctx, zmq4.WithID(zmq4.SocketIdentity("sub")))
-	if err := z.conn.Dial(z.cfg.host); err != nil {
+	if err := n.conn.Dial(n.cfg.host); err != nil {
 		return err
 	}
 
 	defer func() {
-		if !z.connected {
+		if !n.connected {
 			return
 		}
 
-		if err := z.conn.Close(); err != nil {
-			z.onErrFn(err)
+		if err := n.conn.Close(); err != nil {
+			n.onErrFn(err)
 		}
-		z.connected = false
+		n.connected = false
 	}()
 
-	if err := z.conn.SetOption(zmq4.OptionSubscribe, z.cfg.optionValue); err != nil {
+	if err := n.conn.SetOption(zmq4.OptionSubscribe, n.cfg.optionValue); err != nil {
 		return err
 	}
 
-	if z.cfg.raw {
-		if err := z.conn.SetOption(zmq4.OptionSubscribe, "raw"); err != nil {
+	if n.cfg.raw {
+		if err := n.conn.SetOption(zmq4.OptionSubscribe, "raw"); err != nil {
 			return err
 		}
 	}
 
 	for {
-		msg, err := z.conn.Recv()
+		msg, err := n.conn.Recv()
 		if err != nil {
-			z.onErrFn(err)
-		}
-		if !z.connected {
-			z.connected = true
-		}
-		func() {
-			z.mu.RLock()
-			defer z.mu.RUnlock()
+			if errors.Is(err, context.Canceled) {
+				return nil
+			}
 
-			fn, ok := z.subscriptions[Topic(msg.Frames[0])]
+			n.onErrFn(err)
+			continue
+		}
+		n.connected = true
+		func() {
+			n.mu.RLock()
+			defer n.mu.RUnlock()
+
+			fn, ok := n.subscriptions[Topic(msg.Frames[0])]
 			if ok {
 				go fn(msg.Frames)
 			}
@@ -126,34 +134,34 @@ func (z *zmq) Connect(ctx context.Context) error {
 }
 
 // Subscribe to a topic on a bitcoin node 0MQ.
-func (z *zmq) Subscribe(topic Topic, fn MessageFunc) error {
-	if ok := z.cfg.topics[topic]; !ok {
-		return fmt.Errorf("unrecognised topic: %s", topic)
+func (n *nodeMq) Subscribe(topic Topic, fn MessageFunc) error {
+	if ok := n.cfg.topics[topic]; !ok {
+		return fmt.Errorf("%w: %s", ErrInvalidTopic, topic)
 	}
 
-	if !z.cfg.allowOverwrite {
-		if _, ok := z.subscriptions[topic]; ok {
-			return fmt.Errorf("already subscribed to %s", topic)
+	if !n.cfg.allowOverwrite {
+		if _, ok := n.subscriptions[topic]; ok {
+			return fmt.Errorf("%w: %s", ErrAlreadySubscribed, topic)
 		}
 	}
 
-	z.mu.Lock()
-	defer z.mu.Unlock()
+	n.mu.Lock()
+	defer n.mu.Unlock()
 
-	z.subscriptions[topic] = fn
+	n.subscriptions[topic] = fn
 	return nil
 }
 
 // Unsubscribe from a topic on the bitcoin ndoe 0MQ.
-func (z *zmq) Unsubscribe(topic Topic) error {
-	if ok := z.cfg.topics[topic]; !ok {
-		return fmt.Errorf("unrecognised topic: %s", topic)
+func (n *nodeMq) Unsubscribe(topic Topic) error {
+	if ok := n.cfg.topics[topic]; !ok {
+		return fmt.Errorf("%w: %s", ErrInvalidTopic, topic)
 	}
 
-	z.mu.Lock()
-	defer z.mu.Unlock()
+	n.mu.Lock()
+	defer n.mu.Unlock()
 
-	delete(z.subscriptions, topic)
+	delete(n.subscriptions, topic)
 	return nil
 }
 

@@ -10,7 +10,11 @@ import (
 )
 
 func main() {
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
 	z := zmq.NewNodeMQ(
+		zmq.WithContext(ctx),
 		zmq.WithHost("tcp://localhost:28332"),
 		zmq.WithRaw(),
 		zmq.WithErrorHandler(func(err error) {
@@ -19,19 +23,18 @@ func main() {
 	)
 
 	if err := z.Subscribe(zmq.TopicHashTx, func(bb [][]byte) {
-		fmt.Printf("tx hash!\n%s\n", hex.EncodeToString(bb[1]))
+		fmt.Printf("tx hash: %s\n", hex.EncodeToString(bb[1]))
 	}); err != nil {
 		panic(err)
 	}
 
 	if err := z.Subscribe(zmq.TopicRawTx, func(bb [][]byte) {
-		fmt.Printf("tx hex!\n%s\n", hex.EncodeToString(bb[1]))
+		fmt.Printf("tx hex: %s\n", hex.EncodeToString(bb[1]))
 	}); err != nil {
 		panic(err)
 	}
 
-	ctx := context.Background()
-	for err := z.Connect(ctx); err != nil; {
+	for err := z.Connect(); err != nil; {
 		time.Sleep(10 * time.Second)
 		fmt.Println(err)
 	}

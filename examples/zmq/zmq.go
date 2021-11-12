@@ -17,18 +17,18 @@ func main() {
 		zmq.WithContext(ctx),
 		zmq.WithHost("tcp://localhost:28332"),
 		zmq.WithRaw(),
-		zmq.WithErrorHandler(func(err error) {
+		zmq.WithErrorHandler(func(_ context.Context, err error) {
 			fmt.Println("OH NO", err)
 		}),
 	)
 
-	if err := z.Subscribe(zmq.TopicHashTx, func(bb [][]byte) {
+	if err := z.Subscribe(zmq.TopicHashTx, func(_ context.Context, bb [][]byte) {
 		fmt.Printf("tx hash: %s\n", hex.EncodeToString(bb[1]))
 	}); err != nil {
 		panic(err)
 	}
 
-	if err := z.Subscribe(zmq.TopicRawTx, func(bb [][]byte) {
+	if err := z.Subscribe(zmq.TopicRawTx, func(_ context.Context, bb [][]byte) {
 		fmt.Printf("tx hex: %s\n", hex.EncodeToString(bb[1]))
 	}); err != nil {
 		panic(err)

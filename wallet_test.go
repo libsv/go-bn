@@ -16,6 +16,8 @@ import (
 )
 
 func TestWalletClient_DumpPrivateKey(t *testing.T) {
+	t.Parallel()
+
 	tests := map[string]struct {
 		testFile   string
 		address    string

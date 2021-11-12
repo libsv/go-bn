@@ -11,10 +11,10 @@ import (
 )
 
 // MessageFunc a func in which the message is passed to.
-type MessageFunc func([][]byte)
+type MessageFunc func(context.Context, [][]byte)
 
 // ErrorFunc a func in which an error is passed to.
-type ErrorFunc func(err error)
+type ErrorFunc func(ctx context.Context, err error)
 
 // Topic a subscription topic.
 type Topic string
@@ -95,7 +95,7 @@ func (n *nodeMq) Connect() error {
 		}
 
 		if err := n.conn.Close(); err != nil {
-			n.onErrFn(err)
+			n.onErrFn(context.Background(), err)
 		}
 		n.connected = false
 	}()
@@ -117,7 +117,7 @@ func (n *nodeMq) Connect() error {
 				return nil
 			}
 
-			n.onErrFn(err)
+			n.onErrFn(context.Background(), err)
 			continue
 		}
 		n.connected = true
@@ -127,7 +127,7 @@ func (n *nodeMq) Connect() error {
 
 			fn, ok := n.subscriptions[Topic(msg.Frames[0])]
 			if ok {
-				go fn(msg.Frames)
+				go fn(context.Background(), msg.Frames)
 			}
 		}()
 	}
@@ -165,6 +165,6 @@ func (n *nodeMq) Unsubscribe(topic Topic) error {
 	return nil
 }
 
-func defaultOnError(err error) {
+func defaultOnError(_ context.Context, err error) {
 	fmt.Fprintln(os.Stderr, err)
 }

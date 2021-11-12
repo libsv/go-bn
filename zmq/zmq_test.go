@@ -13,6 +13,8 @@ import (
 )
 
 func TestNodeMQ_Subscribe(t *testing.T) {
+	t.Parallel()
+
 	tests := map[string]struct {
 		topics []zmq.Topic
 		opts   []zmq.NodeMQOptFunc
@@ -109,7 +111,7 @@ func TestNodeMQ_Subscribe(t *testing.T) {
 			z := zmq.NewNodeMQ(append(test.opts, zmq.WithCustomZMQSocket(&mocks.SocketMock{}))...)
 			err := func() error {
 				for _, topic := range test.topics {
-					if err := z.Subscribe(topic, func([][]byte) {}); err != nil {
+					if err := z.Subscribe(topic, func(context.Context, [][]byte) {}); err != nil {
 						return err
 					}
 				}
@@ -126,6 +128,8 @@ func TestNodeMQ_Subscribe(t *testing.T) {
 }
 
 func TestNodeMQ_Unsubscribe(t *testing.T) {
+	t.Parallel()
+
 	tests := map[string]struct {
 		subscribedTo    []zmq.Topic
 		unsubscribeFrom []zmq.Topic
@@ -156,7 +160,7 @@ func TestNodeMQ_Unsubscribe(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			z := zmq.NewNodeMQ(append(test.opts, zmq.WithCustomZMQSocket(&mocks.SocketMock{}))...)
 			for _, topic := range test.subscribedTo {
-				assert.NoError(t, z.Subscribe(topic, func([][]byte) {}))
+				assert.NoError(t, z.Subscribe(topic, func(context.Context, [][]byte) {}))
 			}
 
 			assert.True(t, len(test.unsubscribeFrom) > 0, "test %s has not declare a topic to unsub from")
@@ -181,6 +185,7 @@ func TestNodeMQ_Unsubscribe(t *testing.T) {
 
 func TestNodeMQ_Connect(t *testing.T) {
 	t.Parallel()
+
 	type option struct {
 		name  string
 		value interface{}
@@ -432,7 +437,7 @@ func TestNodeMQ_Connect(t *testing.T) {
 				append(
 					test.opts,
 					zmq.WithCustomZMQSocket(socket),
-					zmq.WithErrorHandler(func(err error) {
+					zmq.WithErrorHandler(func(_ context.Context, err error) {
 						errHandlerErrs = append(errHandlerErrs, err)
 					}),
 					zmq.WithHost(test.host),
@@ -450,7 +455,7 @@ func TestNodeMQ_Connect(t *testing.T) {
 			wg.Add(total)
 			for _, topic := range test.topics {
 				topic := topic
-				assert.NoError(t, z.Subscribe(topic, func(msg [][]byte) {
+				assert.NoError(t, z.Subscribe(topic, func(_ context.Context, msg [][]byte) {
 					defer wg.Done()
 					mu.Lock()
 					defer mu.Unlock()

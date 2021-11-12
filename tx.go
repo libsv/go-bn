@@ -17,6 +17,8 @@ type TransactionClient interface {
 	SignRawTransaction(ctx context.Context, tx *bt.Tx,
 		opts *models.OptsSignRawTransaction) (*models.SignedRawTransaction, error)
 	SendRawTransaction(ctx context.Context, tx *bt.Tx, opts *models.OptsSendRawTransaction) (string, error)
+	SendRawTransactions(ctx context.Context,
+		params ...models.ParamsSendRawTransactions) (*models.SendRawTransactionsResponse, error)
 }
 
 // NewTransactionClient returns a client only capable of interfacing with the transaction sub commands
@@ -56,4 +58,10 @@ func (c *client) SendRawTransaction(ctx context.Context, tx *bt.Tx,
 	opts *models.OptsSendRawTransaction) (string, error) {
 	var resp string
 	return resp, c.rpc.Do(ctx, "sendrawtransaction", &resp, c.argsFor(opts, tx.String())...)
+}
+
+func (c *client) SendRawTransactions(ctx context.Context,
+	params ...models.ParamsSendRawTransactions) (*models.SendRawTransactionsResponse, error) {
+	var resp models.SendRawTransactionsResponse
+	return &resp, c.rpc.Do(ctx, "sendrawtransactions", &resp, params)
 }

@@ -307,6 +307,9 @@ var _ bn.NodeClient = &NodeClientMock{}
 // 			SendRawTransactionFunc: func(ctx context.Context, tx *bt.Tx, opts *models.OptsSendRawTransaction) (string, error) {
 // 				panic("mock out the SendRawTransaction method")
 // 			},
+// 			SendRawTransactionsFunc: func(ctx context.Context, params ...models.ParamsSendRawTransactions) (*models.SendRawTransactionsResponse, error) {
+// 				panic("mock out the SendRawTransactions method")
+// 			},
 // 			SendToAddressFunc: func(ctx context.Context, address string, amount uint64, opts *models.OptsSendToAddress) (string, error) {
 // 				panic("mock out the SendToAddress method")
 // 			},
@@ -673,6 +676,9 @@ type NodeClientMock struct {
 
 	// SendRawTransactionFunc mocks the SendRawTransaction method.
 	SendRawTransactionFunc func(ctx context.Context, tx *bt.Tx, opts *models.OptsSendRawTransaction) (string, error)
+
+	// SendRawTransactionsFunc mocks the SendRawTransactions method.
+	SendRawTransactionsFunc func(ctx context.Context, params ...models.ParamsSendRawTransactions) (*models.SendRawTransactionsResponse, error)
 
 	// SendToAddressFunc mocks the SendToAddress method.
 	SendToAddressFunc func(ctx context.Context, address string, amount uint64, opts *models.OptsSendToAddress) (string, error)
@@ -1418,6 +1424,13 @@ type NodeClientMock struct {
 			// Opts is the opts argument value.
 			Opts *models.OptsSendRawTransaction
 		}
+		// SendRawTransactions holds details about calls to the SendRawTransactions method.
+		SendRawTransactions []struct {
+			// Ctx is the ctx argument value.
+			Ctx context.Context
+			// Params is the params argument value.
+			Params []models.ParamsSendRawTransactions
+		}
 		// SendToAddress holds details about calls to the SendToAddress method.
 		SendToAddress []struct {
 			// Ctx is the ctx argument value.
@@ -1709,6 +1722,7 @@ type NodeClientMock struct {
 	lockSendFrom                  sync.RWMutex
 	lockSendMany                  sync.RWMutex
 	lockSendRawTransaction        sync.RWMutex
+	lockSendRawTransactions       sync.RWMutex
 	lockSendToAddress             sync.RWMutex
 	lockSetAccount                sync.RWMutex
 	lockSetBan                    sync.RWMutex
@@ -5036,6 +5050,41 @@ func (mock *NodeClientMock) SendRawTransactionCalls() []struct {
 	mock.lockSendRawTransaction.RLock()
 	calls = mock.calls.SendRawTransaction
 	mock.lockSendRawTransaction.RUnlock()
+	return calls
+}
+
+// SendRawTransactions calls SendRawTransactionsFunc.
+func (mock *NodeClientMock) SendRawTransactions(ctx context.Context, params ...models.ParamsSendRawTransactions) (*models.SendRawTransactionsResponse, error) {
+	if mock.SendRawTransactionsFunc == nil {
+		panic("NodeClientMock.SendRawTransactionsFunc: method is nil but NodeClient.SendRawTransactions was just called")
+	}
+	callInfo := struct {
+		Ctx    context.Context
+		Params []models.ParamsSendRawTransactions
+	}{
+		Ctx:    ctx,
+		Params: params,
+	}
+	mock.lockSendRawTransactions.Lock()
+	mock.calls.SendRawTransactions = append(mock.calls.SendRawTransactions, callInfo)
+	mock.lockSendRawTransactions.Unlock()
+	return mock.SendRawTransactionsFunc(ctx, params...)
+}
+
+// SendRawTransactionsCalls gets all the calls that were made to SendRawTransactions.
+// Check the length with:
+//     len(mockedNodeClient.SendRawTransactionsCalls())
+func (mock *NodeClientMock) SendRawTransactionsCalls() []struct {
+	Ctx    context.Context
+	Params []models.ParamsSendRawTransactions
+} {
+	var calls []struct {
+		Ctx    context.Context
+		Params []models.ParamsSendRawTransactions
+	}
+	mock.lockSendRawTransactions.RLock()
+	calls = mock.calls.SendRawTransactions
+	mock.lockSendRawTransactions.RUnlock()
 	return calls
 }
 

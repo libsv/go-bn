@@ -33,6 +33,9 @@ var _ bn.TransactionClient = &TransactionClientMock{}
 // 			SendRawTransactionFunc: func(ctx context.Context, tx *bt.Tx, opts *models.OptsSendRawTransaction) (string, error) {
 // 				panic("mock out the SendRawTransaction method")
 // 			},
+// 			SendRawTransactionsFunc: func(ctx context.Context, params ...models.ParamsSendRawTransactions) (*models.SendRawTransactionsResponse, error) {
+// 				panic("mock out the SendRawTransactions method")
+// 			},
 // 			SignRawTransactionFunc: func(ctx context.Context, tx *bt.Tx, opts *models.OptsSignRawTransaction) (*models.SignedRawTransaction, error) {
 // 				panic("mock out the SignRawTransaction method")
 // 			},
@@ -54,6 +57,9 @@ type TransactionClientMock struct {
 
 	// SendRawTransactionFunc mocks the SendRawTransaction method.
 	SendRawTransactionFunc func(ctx context.Context, tx *bt.Tx, opts *models.OptsSendRawTransaction) (string, error)
+
+	// SendRawTransactionsFunc mocks the SendRawTransactions method.
+	SendRawTransactionsFunc func(ctx context.Context, params ...models.ParamsSendRawTransactions) (*models.SendRawTransactionsResponse, error)
 
 	// SignRawTransactionFunc mocks the SignRawTransaction method.
 	SignRawTransactionFunc func(ctx context.Context, tx *bt.Tx, opts *models.OptsSignRawTransaction) (*models.SignedRawTransaction, error)
@@ -94,6 +100,13 @@ type TransactionClientMock struct {
 			// Opts is the opts argument value.
 			Opts *models.OptsSendRawTransaction
 		}
+		// SendRawTransactions holds details about calls to the SendRawTransactions method.
+		SendRawTransactions []struct {
+			// Ctx is the ctx argument value.
+			Ctx context.Context
+			// Params is the params argument value.
+			Params []models.ParamsSendRawTransactions
+		}
 		// SignRawTransaction holds details about calls to the SignRawTransaction method.
 		SignRawTransaction []struct {
 			// Ctx is the ctx argument value.
@@ -108,6 +121,7 @@ type TransactionClientMock struct {
 	lockFundRawTransaction   sync.RWMutex
 	lockRawTransaction       sync.RWMutex
 	lockSendRawTransaction   sync.RWMutex
+	lockSendRawTransactions  sync.RWMutex
 	lockSignRawTransaction   sync.RWMutex
 }
 
@@ -260,6 +274,41 @@ func (mock *TransactionClientMock) SendRawTransactionCalls() []struct {
 	mock.lockSendRawTransaction.RLock()
 	calls = mock.calls.SendRawTransaction
 	mock.lockSendRawTransaction.RUnlock()
+	return calls
+}
+
+// SendRawTransactions calls SendRawTransactionsFunc.
+func (mock *TransactionClientMock) SendRawTransactions(ctx context.Context, params ...models.ParamsSendRawTransactions) (*models.SendRawTransactionsResponse, error) {
+	if mock.SendRawTransactionsFunc == nil {
+		panic("TransactionClientMock.SendRawTransactionsFunc: method is nil but TransactionClient.SendRawTransactions was just called")
+	}
+	callInfo := struct {
+		Ctx    context.Context
+		Params []models.ParamsSendRawTransactions
+	}{
+		Ctx:    ctx,
+		Params: params,
+	}
+	mock.lockSendRawTransactions.Lock()
+	mock.calls.SendRawTransactions = append(mock.calls.SendRawTransactions, callInfo)
+	mock.lockSendRawTransactions.Unlock()
+	return mock.SendRawTransactionsFunc(ctx, params...)
+}
+
+// SendRawTransactionsCalls gets all the calls that were made to SendRawTransactions.
+// Check the length with:
+//     len(mockedTransactionClient.SendRawTransactionsCalls())
+func (mock *TransactionClientMock) SendRawTransactionsCalls() []struct {
+	Ctx    context.Context
+	Params []models.ParamsSendRawTransactions
+} {
+	var calls []struct {
+		Ctx    context.Context
+		Params []models.ParamsSendRawTransactions
+	}
+	mock.lockSendRawTransactions.RLock()
+	calls = mock.calls.SendRawTransactions
+	mock.lockSendRawTransactions.RUnlock()
 	return calls
 }
 

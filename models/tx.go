@@ -178,3 +178,37 @@ type OptsSendRawTransaction struct {
 func (o *OptsSendRawTransaction) Args() []interface{} {
 	return []interface{}{o.AllowHighFees, !o.CheckFee}
 }
+
+// ParamsSendRawTransactions params.
+type ParamsSendRawTransactions struct {
+	Hex                      string `json:"hex"`
+	AllowHighFees            bool   `json:"allowhighfees"`
+	DontCheckFee             bool   `json:"dontcheckfee"`
+	ListUnconfirmedAncestors bool   `json:"listunconfirmedancestors"`
+}
+
+// SendRawTransactionsResponse response.
+type SendRawTransactionsResponse struct {
+	Known   []string `json:"known"`
+	Evicted []string `json:"evicted"`
+	Invalid []struct {
+		TxID         string `json:"txid"`
+		RejectCode   int    `json:"reject_code"`
+		RejectReason string `json:"reject_reason"`
+		CollidedWith []struct {
+			TxID string `json:"txid"`
+			Size uint64 `json:"size"`
+			Hex  string `json:"hex"`
+		} `json:"collidedWith"`
+	} `json:"invalid"`
+	Unconfirmed []struct {
+		TxID      string `json:"txid"`
+		Ancestors []struct {
+			TxID string `json:"txid"`
+			Vin  []struct {
+				TxID string `json:"txid"`
+				Vout uint32 `json:"vout"`
+			} `json:"vin"`
+		} `json:"ancestors"`
+	} `json:"unconfirmed"`
+}

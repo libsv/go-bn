@@ -129,8 +129,7 @@ func (n *nodeMq) Connect() error {
 			n.mu.RLock()
 			defer n.mu.RUnlock()
 
-			fn, ok := n.subscriptions[Topic(msg.Frames[0])]
-			if ok {
+			if fn, ok := n.subscriptions[Topic(msg.Frames[0])]; ok {
 				go fn(context.Background(), msg.Frames)
 			}
 		}()
@@ -160,19 +159,6 @@ func (n *nodeMq) Subscribe(topic Topic, fn MessageFunc) error {
 	defer n.mu.Unlock()
 
 	n.subscriptions[topic] = fn
-	return nil
-}
-
-// Unsubscribe from a topic on the bitcoin node 0MQ.
-func (n *nodeMq) Unsubscribe(topic Topic) error {
-	if ok := n.cfg.topics[topic]; !ok {
-		return fmt.Errorf("%w: %s", ErrInvalidTopic, topic)
-	}
-
-	n.mu.Lock()
-	defer n.mu.Unlock()
-
-	delete(n.subscriptions, topic)
 	return nil
 }
 
@@ -236,6 +222,19 @@ func (n *nodeMq) SubscribeRawBlock(fn RawBlockFunc) error {
 		}
 		fn(ctx, blk)
 	})
+}
+
+// Unsubscribe from a topic on the bitcoin node 0MQ.
+func (n *nodeMq) Unsubscribe(topic Topic) error {
+	if ok := n.cfg.topics[topic]; !ok {
+		return fmt.Errorf("%w: %s", ErrInvalidTopic, topic)
+	}
+
+	n.mu.Lock()
+	defer n.mu.Unlock()
+
+	delete(n.subscriptions, topic)
+	return nil
 }
 
 func defaultOnError(_ context.Context, err error) {

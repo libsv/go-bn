@@ -693,7 +693,7 @@ func TestNodeMQ_SubscribeHashBlock(t *testing.T) {
 			var mu sync.Mutex
 			var wg sync.WaitGroup
 			wg.Add(len(test.expHashes))
-			hashes := make(map[string]bool, 0)
+			hashes := make(map[string]bool)
 			assert.NoError(t, c.SubscribeHashBlock(func(ctx context.Context, hash string) {
 				defer wg.Done()
 				defer mu.Unlock()
@@ -847,7 +847,7 @@ func TestNodeMQ_SubscribeRawTx(t *testing.T) {
 					errs = append(errs, err.Error())
 				}),
 			)
-			txs := make(map[string]bool, 0)
+			txs := make(map[string]bool)
 			assert.NoError(t, c.SubscribeRawTx(func(ctx context.Context, tx *bt.Tx) {
 				defer wg.Done()
 				defer msgMu.Unlock()
@@ -1002,7 +1002,7 @@ func TestNodeMQ_SubscribeRawBlock(t *testing.T) {
 					errs = append(errs, err.Error())
 				}),
 			)
-			blocks := make(map[string]bool, 0)
+			blocks := make(map[string]bool)
 			assert.NoError(t, c.SubscribeRawBlock(func(ctx context.Context, blk *bc.Block) {
 				defer wg.Done()
 				defer msgMu.Unlock()
@@ -1150,7 +1150,7 @@ func TestNodeMQ_SubscribeDiscardFromMempool(t *testing.T) {
 					errs = append(errs, err.Error())
 				}),
 			)
-			discards := make(map[string]bool, 0)
+			discards := make(map[string]bool)
 			assert.NoError(t, c.SubscribeDiscardFromMempool(func(ctx context.Context, msg *zmq.MempoolDiscard) {
 				defer wg.Done()
 				defer msgMu.Unlock()
@@ -1298,7 +1298,7 @@ func TestNodeMQ_SubscribeRemovedFromMempoolBlock(t *testing.T) {
 					errs = append(errs, err.Error())
 				}),
 			)
-			discards := make(map[string]bool, 0)
+			discards := make(map[string]bool)
 			assert.NoError(t, c.SubscribeRemovedFromMempoolBlock(func(ctx context.Context, msg *zmq.MempoolDiscard) {
 				defer wg.Done()
 				defer msgMu.Unlock()

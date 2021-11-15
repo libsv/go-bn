@@ -2,6 +2,7 @@ package zmq_test
 
 import (
 	"context"
+	"encoding/hex"
 	"errors"
 	"sync"
 	"testing"
@@ -475,6 +476,115 @@ func TestNodeMQ_Connect(t *testing.T) {
 			assert.Equal(t, test.expOptions, options)
 			assert.Equal(t, test.expCounts, m)
 			assert.Equal(t, test.expErrorHandlerErrors, errHandlerErrs)
+		})
+	}
+}
+
+func TestNodeMQ_SubscribeHashTx(t *testing.T) {
+	t.Parallel()
+
+	tests := map[string]struct {
+		messages  []zmq4.Msg
+		expHashes []string
+	}{
+		"successful messages": {
+			messages: []zmq4.Msg{{
+				Frames: func() [][]byte {
+					header := []byte(zmq.TopicHashTx)
+					body, err := hex.DecodeString("b9037b78403cc4e76a06060b4e9d1e1cdf7c85ce7cb6f074e1f9ed2fb6aa10a6")
+					assert.NoError(t, err)
+
+					return [][]byte{header, body}
+				}(),
+			}, {
+				Frames: func() [][]byte {
+					header := []byte(zmq.TopicHashTx)
+					body, err := hex.DecodeString("4f69dda2c8b2eb01ebf002d559e15e7ac183acf51730e2bf889d4638864675a9")
+					assert.NoError(t, err)
+
+					return [][]byte{header, body}
+				}(),
+			}},
+			expHashes: []string{
+				"4f69dda2c8b2eb01ebf002d559e15e7ac183acf51730e2bf889d4638864675a9",
+				"b9037b78403cc4e76a06060b4e9d1e1cdf7c85ce7cb6f074e1f9ed2fb6aa10a6",
+			},
+		},
+		"irrelevant messages are ignored": {
+			messages: []zmq4.Msg{{
+				Frames: func() [][]byte {
+					header := []byte(zmq.TopicHashTx)
+					body, err := hex.DecodeString("b9037b78403cc4e76a06060b4e9d1e1cdf7c85ce7cb6f074e1f9ed2fb6aa10a6")
+					assert.NoError(t, err)
+
+					return [][]byte{header, body}
+				}(),
+			}, {
+				Frames: func() [][]byte {
+					header := []byte(zmq.TopicHashBlock)
+					body, err := hex.DecodeString("4f69dda2c8b2eb01ebf002d559e15e7ac183acf51730e2bf889d4638864675a9")
+					assert.NoError(t, err)
+
+					return [][]byte{header, body}
+				}(),
+			}, {
+				Frames: func() [][]byte {
+					header := []byte(zmq.TopicHashTx)
+					body, err := hex.DecodeString("4f69dda2c8b2eb01ebf002d559e15e7ac183acf51730e2bf889d4638864675a9")
+					assert.NoError(t, err)
+
+					return [][]byte{header, body}
+				}(),
+			}},
+			expHashes: []string{
+				"4f69dda2c8b2eb01ebf002d559e15e7ac183acf51730e2bf889d4638864675a9",
+				"b9037b78403cc4e76a06060b4e9d1e1cdf7c85ce7cb6f074e1f9ed2fb6aa10a6",
+			},
+		},
+	}
+
+	for name, test := range tests {
+		t.Run(name, func(t *testing.T) {
+			var errHandlerErrs []error
+			socket := &mocks.SocketMock{
+				DialFunc: func(addr string) error {
+					return nil
+				},
+				SetOptionFunc: func(opt string, v interface{}) error {
+					return nil
+				},
+				RecvFunc: func() (zmq4.Msg, error) {
+					if len(test.messages) == 0 {
+						return zmq4.Msg{}, context.Canceled
+					}
+					defer func() { test.messages = test.messages[1:] }()
+
+					return test.messages[0], nil
+				},
+				CloseFunc: func() error {
+					return nil
+				},
+			}
+			c := zmq.NewNodeMQ(
+				zmq.WithHost("tcp://localhost:12345"),
+				zmq.WithCustomZMQSocket(socket),
+				zmq.WithErrorHandler(func(ctx context.Context, err error) {
+					errHandlerErrs = append(errHandlerErrs, err)
+				}),
+			)
+
+			var wg sync.WaitGroup
+			wg.Add(len(test.expHashes))
+			var hashes []string
+			c.SubscribeHashTx(func(ctx context.Context, hash string) {
+				defer wg.Done()
+				hashes = append(hashes, hash)
+			})
+
+			assert.NoError(t, c.Connect())
+			wg.Wait()
+
+			assert.Equal(t, test.expHashes, hashes)
 		})
 	}
 }

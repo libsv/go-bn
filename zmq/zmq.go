@@ -144,8 +144,15 @@ func (n *nodeMq) Subscribe(topic Topic, fn MessageFunc) error {
 	}
 
 	if !n.cfg.allowOverwrite {
-		if _, ok := n.subscriptions[topic]; ok {
-			return fmt.Errorf("%w: %s", ErrAlreadySubscribed, topic)
+		if err := func() error {
+			n.mu.RLock()
+			defer n.mu.RUnlock()
+			if _, ok := n.subscriptions[topic]; ok {
+				return fmt.Errorf("%w: %s", ErrAlreadySubscribed, topic)
+			}
+			return nil
+		}(); err != nil {
+			return err
 		}
 	}
 
@@ -156,7 +163,7 @@ func (n *nodeMq) Subscribe(topic Topic, fn MessageFunc) error {
 	return nil
 }
 
-// Unsubscribe from a topic on the bitcoin ndoe 0MQ.
+// Unsubscribe from a topic on the bitcoin node 0MQ.
 func (n *nodeMq) Unsubscribe(topic Topic) error {
 	if ok := n.cfg.topics[topic]; !ok {
 		return fmt.Errorf("%w: %s", ErrInvalidTopic, topic)
@@ -169,31 +176,22 @@ func (n *nodeMq) Unsubscribe(topic Topic) error {
 	return nil
 }
 
+// SubscribeHashTx subscribe to `hashtx` and receive its messages parsed.
 func (n *nodeMq) SubscribeHashTx(fn HashFunc) error {
-	if err := n.checkTopic(TopicHashTx); err != nil {
-		return err
-	}
-
 	return n.Subscribe(TopicHashTx, func(ctx context.Context, bb [][]byte) {
 		fn(ctx, hex.EncodeToString(bb[1]))
 	})
 }
 
+// SubscribeHashBlock subscribe to `hashblock` and receive its messages parsed.
 func (n *nodeMq) SubscribeHashBlock(fn HashFunc) error {
-	if err := n.checkTopic(TopicHashBlock); err != nil {
-		return err
-	}
-
 	return n.Subscribe(TopicHashBlock, func(ctx context.Context, bb [][]byte) {
 		fn(ctx, hex.EncodeToString(bb[1]))
 	})
 }
 
+// SubscribeDiscardFromMempool subscribe to `discardfrommempool` and receive its messages parsed.
 func (n *nodeMq) SubscribeDiscardFromMempool(fn DiscardFunc) error {
-	if err := n.checkTopic(TopicDiscardFromMempool); err != nil {
-		return err
-	}
-
 	return n.Subscribe(TopicDiscardFromMempool, func(ctx context.Context, bb [][]byte) {
 		var d MempoolDiscard
 		if err := json.Unmarshal(bb[1], &d); err != nil {
@@ -204,11 +202,8 @@ func (n *nodeMq) SubscribeDiscardFromMempool(fn DiscardFunc) error {
 	})
 }
 
+// SubscribeRemovedFromMempoolBlock subscribe to `removedfrommempoolblock` and receive its messages parsed.
 func (n *nodeMq) SubscribeRemovedFromMempoolBlock(fn DiscardFunc) error {
-	if err := n.checkTopic(TopicRemovedFromMempoolBlock); err != nil {
-		return err
-	}
-
 	return n.Subscribe(TopicRemovedFromMempoolBlock, func(ctx context.Context, bb [][]byte) {
 		var d MempoolDiscard
 		if err := json.Unmarshal(bb[1], &d); err != nil {
@@ -219,62 +214,28 @@ func (n *nodeMq) SubscribeRemovedFromMempoolBlock(fn DiscardFunc) error {
 	})
 }
 
+// SubscribeRawTx subscribe to `rawtx` and receive its messages parsed.
 func (n *nodeMq) SubscribeRawTx(fn RawTxFunc) error {
-	if err := n.checkTopic(TopicRawTx); err != nil {
-		return err
-	}
-
 	return n.Subscribe(TopicRawTx, func(ctx context.Context, bb [][]byte) {
 		tx, err := bt.NewTxFromBytes(bb[1])
 		if err != nil {
 			n.onErrFn(ctx, err)
 			return
 		}
-
 		fn(ctx, tx)
 	})
 }
 
+// SubscribeRawBlock subscribe to `rawblock` and receive its messages parsed.
 func (n *nodeMq) SubscribeRawBlock(fn RawBlockFunc) error {
-	if err := n.checkTopic(TopicRawBlock); err != nil {
-		return err
-	}
-
 	return n.Subscribe(TopicRawBlock, func(ctx context.Context, bb [][]byte) {
 		blk, err := bc.NewBlockFromBytes(bb[1])
 		if err != nil {
 			n.onErrFn(ctx, err)
 			return
 		}
-
 		fn(ctx, blk)
 	})
-}
-
-func (n *nodeMq) checkTopic(topic Topic) error {
-	if err := n.validTopic(topic); err != nil {
-		return err
-	}
-
-	if n.cfg.allowOverwrite {
-		return nil
-	}
-
-	n.mu.RLock()
-	defer n.mu.RUnlock()
-	if _, ok := n.subscriptions[topic]; ok {
-		return fmt.Errorf("%w: %s", ErrAlreadySubscribed, topic)
-	}
-
-	return nil
-}
-
-func (n *nodeMq) validTopic(topic Topic) error {
-	if ok := n.cfg.topics[topic]; !ok {
-		return fmt.Errorf("%w: %s", ErrInvalidTopic, topic)
-	}
-
-	return nil
 }
 
 func defaultOnError(_ context.Context, err error) {

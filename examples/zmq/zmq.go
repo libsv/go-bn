@@ -5,7 +5,7 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
-	"time"
+	"log"
 
 	"github.com/libsv/go-bc"
 	"github.com/libsv/go-bn/zmq"
@@ -59,8 +59,5 @@ func main() {
 		panic(err)
 	}
 
-	for err := z.Connect(); err != nil; {
-		time.Sleep(10 * time.Second)
-		fmt.Println(err)
-	}
+	log.Fatal(z.Connect())
 }

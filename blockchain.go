@@ -105,7 +105,7 @@ func (c *client) BlockHash(ctx context.Context, height int) (string, error) {
 }
 
 func (c *client) BlockHeader(ctx context.Context, hash string) (*models.BlockHeader, error) {
-	var resp models.BlockHeader
+	resp := models.BlockHeader{BlockHeader: &bc.BlockHeader{}}
 	return &resp, c.rpc.Do(ctx, "getblockheader", &resp, hash, true)
 }
 

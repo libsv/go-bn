@@ -1,8 +1,10 @@
 package models
 
 import (
+	"encoding/hex"
 	"encoding/json"
 
+	"github.com/libsv/go-bc"
 	"github.com/libsv/go-bt/v2"
 )
 
@@ -40,21 +42,89 @@ func (b *Block) UnmarshalJSON(bb []byte) error {
 
 // BlockHeader model.
 type BlockHeader struct {
-	Hash              string  `json:"hash"`
-	Confirmations     uint64  `json:"confirmations"`
-	Size              uint64  `json:"size"`
-	Height            uint64  `json:"height"`
-	Version           uint64  `json:"version"`
-	VersionHex        string  `json:"versionHex"`
-	NumTx             uint64  `json:"num_tx"`
-	Time              uint64  `json:"time"`
-	MedianTime        uint64  `json:"mediantime"`
-	Nonce             uint64  `json:"nonce"`
-	Bits              string  `json:"bits"`
-	Difficulty        float64 `json:"difficulty"`
-	Chainwork         string  `json:"chainwork"`
-	PreviousBlockHash string  `json:"previousblockhash"`
-	NextBlockHash     string  `json:"nextblockhash"`
+	*bc.BlockHeader
+	Hash          string `json:"hash"`
+	Confirmations uint64 `json:"confirmations"`
+	Height        uint64 `json:"height"`
+	//Version           uint64  `json:"version"`
+	VersionHex string `json:"versionHex"`
+	NumTx      uint64 `json:"num_tx"`
+	//Time              uint64  `json:"time"`
+	MedianTime uint64 `json:"mediantime"`
+	//Nonce             uint64  `json:"nonce"`
+	//Bits       string  `json:"bits"`
+	Difficulty float64 `json:"difficulty"`
+	Chainwork  string  `json:"chainwork"`
+	//PreviousBlockHash string  `json:"previousblockhash"`
+	NextBlockHash string `json:"nextblockhash"`
+}
+
+func (b *BlockHeader) UnmarshalJSON(bb []byte) error {
+	bh := struct {
+		Hash              string  `json:"hash"`
+		Confirmations     uint64  `json:"confirmations"`
+		Height            uint64  `json:"height"`
+		VersionHex        string  `json:"versionHex"`
+		NumTx             uint64  `json:"num_tx"`
+		MerkleRoot        string  `json:"merkleroot"`
+		MedianTime        uint64  `json:"mediantime"`
+		Difficulty        float64 `json:"difficulty"`
+		Chainwork         string  `json:"chainwork"`
+		NextBlockHash     string  `json:"nextblockhash"`
+		PreviousBlockHash string  `json:"previousblockhash"`
+	}{}
+
+	if err := json.Unmarshal(bb, &bh); err != nil {
+		return err
+	}
+
+	var blockHeader bc.BlockHeader
+	err := json.Unmarshal(bb, &blockHeader)
+	if err != nil {
+		return err
+	}
+
+	blockHeader.HashMerkleRoot, err = hex.DecodeString(bh.MerkleRoot)
+	if err != nil {
+		return err
+	}
+
+	blockHeader.HashPrevBlock, err = hex.DecodeString(bh.PreviousBlockHash)
+	if err != nil {
+		return err
+	}
+
+	b.Hash = bh.Hash
+	b.Confirmations = bh.Confirmations
+	b.Height = bh.Height
+	b.VersionHex = bh.VersionHex
+	b.NumTx = bh.NumTx
+	b.MedianTime = bh.MedianTime
+	b.Difficulty = bh.Difficulty
+	b.Chainwork = bh.Chainwork
+	b.NextBlockHash = bh.NextBlockHash
+	*b.BlockHeader = blockHeader
+	return nil
+}
+
+func (b *BlockHeader) MarshalJSON() ([]byte, error) {
+	cpy := *b
+	cpy.BlockHeader = nil
+	bh := struct {
+		BlockHeader
+		PreviousBlockHash string `json:"previousblockhash"`
+		MerkleRoot        string `json:"merkleroot"`
+		Version           uint32 `json:"version"`
+		Nonce             uint32 `json:"nonce"`
+	}{
+		PreviousBlockHash: b.HashPrevBlockStr(),
+		MerkleRoot:        b.HashMerkleRootStr(),
+		Version:           b.Version,
+		Nonce:             b.Nonce,
+		BlockHeader:       cpy,
+	}
+
+	return json.Marshal(bh)
 }
 
 // BlockTemplate model.

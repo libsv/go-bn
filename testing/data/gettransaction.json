@@ -1,0 +1,29 @@
+{
+  "result": {
+    "amount": -1,
+    "fee": -2.26e-06,
+    "confirmations": 1,
+    "blockhash": "2d337d7e99dabbb99f0e04ff37801695dcf7492f7b21c831e0c34a87fd347d1a",
+    "blockindex": 1,
+    "blocktime": 1636986958,
+    "txid": "507e6029ba68e13f5d0410c50b2856be23b7c842a6c55c3c3ac70a07ff99103b",
+    "walletconflicts": [],
+    "time": 1636986956,
+    "timereceived": 1636986956,
+    "details": [
+      {
+        "account": "",
+        "address": "mxuFwqfjvGzZXJsijy1BDKP5S9KDmhiwX7",
+        "category": "send",
+        "amount": -1,
+        "vout": 1,
+        "fee": -2.26e-06,
+        "abandoned": false
+      }
+    ],
+    "hex": "02000000016608292a4bd22e1a95d8759f48ada0efd007f47fbaeacc8211b07940e1e62c63000000006a473044022038f033a2d4afc554176be95d76e9ef70733d07e1fe15f0834bd84a3813fdf2f6022054acc32e63e1bdee4580aca6e5af787f6fe04354ec7a65b0ce78f6954289a27141210373774ffe2491fc1208e90451adc08d66da26c0341efe232842135c21cecefd7efeffffff027afd2318010000001976a91457004b35706913a16970592c48af25883786db7588ac00e1f505000000001976a914beb20631d5271a6e150231e625bccff55a58cbea88ac7b000000"
+  },
+  "error": null,
+  "id": "curltest"
+}
+

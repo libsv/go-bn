@@ -15,6 +15,186 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+func TestWalletClient_Balance(t *testing.T) {
+	tests := map[string]struct {
+		testFile   string
+		opts       *models.OptsBalance
+		expBalance uint64
+		expRequest models.Request
+		expErr     error
+	}{
+		"successful request": {
+			testFile:   "balance",
+			expBalance: 123455600,
+			expRequest: models.Request{
+				ID:      "go-bn",
+				JSONRpc: "1.0",
+				Method:  "getbalance",
+			},
+		},
+		"successful request with opts": {
+			testFile:   "balance",
+			expBalance: 123455600,
+			opts: &models.OptsBalance{
+				MinimumConfirmations: 1,
+				Account:              "wow",
+				IncludeWatchOnly:     true,
+			},
+			expRequest: models.Request{
+				ID:      "go-bn",
+				JSONRpc: "1.0",
+				Method:  "getbalance",
+				Params:  []interface{}{"wow", 1.0, true},
+			},
+		},
+	}
+
+	for name, test := range tests {
+		t.Run(name, func(t *testing.T) {
+
+			svr, cls := util.TestServer(t, &test.expRequest, test.testFile)
+			defer cls()
+
+			r := service.NewRPC(&config.RPC{
+				Host: svr.URL,
+			}, &http.Client{})
+
+			c := bn.NewWalletClient(
+				bn.WithHost(svr.URL),
+				bn.WithCustomRPC(&mocks.MockRPC{
+					DoFunc: func(ctx context.Context, method string, out interface{}, args ...interface{}) error {
+						assert.Equal(t, "getbalance", method)
+						if test.opts != nil {
+							assert.Equal(t, 3, len(args))
+						} else {
+							assert.Equal(t, 0, len(args))
+						}
+
+						return r.Do(ctx, method, out, args...)
+					},
+				}),
+			)
+
+			balance, err := c.Balance(context.TODO(), test.opts)
+			if test.expErr != nil {
+				assert.Error(t, err)
+				assert.EqualError(t, err, test.expErr.Error())
+			} else {
+				assert.NoError(t, err)
+				assert.Equal(t, test.expBalance, balance)
+			}
+		})
+	}
+}
+
+func TestWalletClient_UnconfirmedBalance(t *testing.T) {
+	tests := map[string]struct {
+		testFile   string
+		expBalance uint64
+		expRequest models.Request
+		expErr     error
+	}{
+		"successful request": {
+			testFile:   "balance",
+			expBalance: 123455600,
+			expRequest: models.Request{
+				ID:      "go-bn",
+				JSONRpc: "1.0",
+				Method:  "getunconfirmedbalance",
+			},
+		},
+	}
+
+	for name, test := range tests {
+		t.Run(name, func(t *testing.T) {
+
+			svr, cls := util.TestServer(t, &test.expRequest, test.testFile)
+			defer cls()
+
+			r := service.NewRPC(&config.RPC{
+				Host: svr.URL,
+			}, &http.Client{})
+
+			c := bn.NewWalletClient(
+				bn.WithHost(svr.URL),
+				bn.WithCustomRPC(&mocks.MockRPC{
+					DoFunc: func(ctx context.Context, method string, out interface{}, args ...interface{}) error {
+						assert.Equal(t, "getunconfirmedbalance", method)
+						assert.Equal(t, 0, len(args))
+
+						return r.Do(ctx, method, out, args...)
+					},
+				}),
+			)
+
+			balance, err := c.UnconfirmedBalance(context.TODO())
+			if test.expErr != nil {
+				assert.Error(t, err)
+				assert.EqualError(t, err, test.expErr.Error())
+			} else {
+				assert.NoError(t, err)
+				assert.Equal(t, test.expBalance, balance)
+			}
+		})
+	}
+}
+
+func TestWalletClient_ReceivedByAddress(t *testing.T) {
+	tests := map[string]struct {
+		testFile    string
+		address     string
+		expReceived uint64
+		expRequest  models.Request
+		expErr      error
+	}{
+		"successful request": {
+			testFile:    "getreceivedbyaddress",
+			address:     "mzcEDt2d7QwHazAwD11WWSn8eSCb4gtpSY",
+			expReceived: 25000,
+			expRequest: models.Request{
+				ID:      "go-bn",
+				JSONRpc: "1.0",
+				Method:  "getreceivedbyaddress",
+				Params:  []interface{}{"mzcEDt2d7QwHazAwD11WWSn8eSCb4gtpSY"},
+			},
+		},
+	}
+
+	for name, test := range tests {
+		t.Run(name, func(t *testing.T) {
+
+			svr, cls := util.TestServer(t, &test.expRequest, test.testFile)
+			defer cls()
+
+			r := service.NewRPC(&config.RPC{
+				Host: svr.URL,
+			}, &http.Client{})
+
+			c := bn.NewWalletClient(
+				bn.WithHost(svr.URL),
+				bn.WithCustomRPC(&mocks.MockRPC{
+					DoFunc: func(ctx context.Context, method string, out interface{}, args ...interface{}) error {
+						assert.Equal(t, "getreceivedbyaddress", method)
+						assert.Equal(t, 1, len(args))
+						assert.Equal(t, test.address, args[0])
+
+						return r.Do(ctx, method, out, args...)
+					},
+				}),
+			)
+
+			balance, err := c.ReceivedByAddress(context.TODO(), test.address)
+			if test.expErr != nil {
+				assert.Error(t, err)
+				assert.EqualError(t, err, test.expErr.Error())
+			} else {
+				assert.NoError(t, err)
+				assert.Equal(t, test.expReceived, balance)
+			}
+		})
+	}
+}
+
 func TestWalletClient_DumpPrivateKey(t *testing.T) {
 	t.Parallel()
 

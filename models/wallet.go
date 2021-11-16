@@ -40,8 +40,8 @@ func (o *OptsNewAddress) Args() []interface{} {
 
 // Transaction model.
 type Transaction struct {
-	Amount          float64       `json:"amount"`
-	Fee             float64       `json:"fee"`
+	Amount          int64
+	Fee             int64
 	Confirmations   uint32        `json:"confirmations"`
 	BlockHash       string        `json:"blockhash"`
 	BlockIndex      uint32        `json:"blockindex"`
@@ -50,17 +50,20 @@ type Transaction struct {
 	WalletConflicts []interface{} `json:"walletconflicts"`
 	Time            uint64        `json:"time"`
 	TimeReceived    uint64        `json:"timereceived"`
-	Details         []struct {
-		Account   string  `json:"account"`
-		Address   string  `json:"address"`
-		Category  string  `json:"category"`
-		Amount    float64 `json:"amount"`
-		Label     string  `json:"label"`
-		Vout      uint32  `json:"vout"`
-		Fee       float64 `json:"fee"`
-		Abandoned bool    `json:"abandoned"`
-	} `json:"details"`
-	Tx *bt.Tx `json:"tx"`
+	Details         []TransactionDetail
+	Tx              *bt.Tx `json:"tx"`
+}
+
+// TransactionDetail model.
+type TransactionDetail struct {
+	Account   string
+	Address   string
+	Category  string
+	Amount    int64
+	Label     string
+	Vout      uint32
+	Fee       int64
+	Abandoned bool
 }
 
 // WalletInfo model.

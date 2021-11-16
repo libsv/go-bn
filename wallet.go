@@ -106,14 +106,14 @@ func (c *client) AccountAddresses(ctx context.Context, account string) ([]string
 func (c *client) Balance(ctx context.Context, opts *models.OptsBalance) (uint64, error) {
 	var resp float64
 	err := c.rpc.Do(ctx, "getbalance", &resp, c.argsFor(opts)...)
-	return util.SatoshisToBSV(resp), err
+	return util.BSVToSatoshis(resp), err
 }
 
 // TODO: do not cache
 func (c *client) UnconfirmedBalance(ctx context.Context) (uint64, error) {
 	var resp float64
 	err := c.rpc.Do(ctx, "getunconfirmedbalance", &resp)
-	return util.SatoshisToBSV(resp), err
+	return util.BSVToSatoshis(resp), err
 }
 
 // TODO: do not cache
@@ -132,7 +132,7 @@ func (c *client) RawChangeAddress(ctx context.Context) (string, error) {
 func (c *client) ReceivedByAddress(ctx context.Context, address string) (uint64, error) {
 	var resp float64
 	err := c.rpc.Do(ctx, "getreceivedbyaddress", &resp, address)
-	return util.SatoshisToBSV(resp), err
+	return util.BSVToSatoshis(resp), err
 }
 
 func (c *client) Transaction(ctx context.Context, txID string) (*models.Transaction, error) {
@@ -228,7 +228,7 @@ func (c *client) LockUnspent(ctx context.Context, lock bool, opts *models.OptsLo
 
 func (c *client) Move(ctx context.Context, from, to string, amount uint64, opts *models.OptsMove) (bool, error) {
 	var resp bool
-	return resp, c.rpc.Do(ctx, "move", &resp, c.argsFor(opts, from, to, util.BSVToSatoshis(amount))...)
+	return resp, c.rpc.Do(ctx, "move", &resp, c.argsFor(opts, from, to, util.SatoshisToBSV(int64(amount)))...)
 }
 
 func (c *client) RemovePrunedFunds(ctx context.Context, txID string) error {
@@ -238,7 +238,7 @@ func (c *client) RemovePrunedFunds(ctx context.Context, txID string) error {
 func (c *client) SendFrom(ctx context.Context, from, to string, amount uint64,
 	opts *models.OptsSendFrom) (string, error) {
 	var resp string
-	return resp, c.rpc.Do(ctx, "sendfrom", &resp, c.argsFor(opts, from, to, util.BSVToSatoshis(amount))...)
+	return resp, c.rpc.Do(ctx, "sendfrom", &resp, c.argsFor(opts, from, to, util.SatoshisToBSV(int64(amount)))...)
 }
 
 func (c *client) SendMany(ctx context.Context, from string, amounts map[string]uint64,
@@ -250,7 +250,7 @@ func (c *client) SendMany(ctx context.Context, from string, amounts map[string]u
 func (c *client) SendToAddress(ctx context.Context, address string, amount uint64,
 	opts *models.OptsSendToAddress) (string, error) {
 	var resp string
-	return resp, c.rpc.Do(ctx, "sendtoaddress", &resp, c.argsFor(opts, address, util.BSVToSatoshis(amount))...)
+	return resp, c.rpc.Do(ctx, "sendtoaddress", &resp, c.argsFor(opts, address, util.SatoshisToBSV(int64(amount)))...)
 }
 
 func (c *client) SetAccount(ctx context.Context, address, account string) error {
@@ -259,7 +259,7 @@ func (c *client) SetAccount(ctx context.Context, address, account string) error 
 
 func (c *client) SetTxFee(ctx context.Context, amount uint64) (bool, error) {
 	var resp bool
-	return resp, c.rpc.Do(ctx, "settxfee", &resp, util.BSVToSatoshis(amount))
+	return resp, c.rpc.Do(ctx, "settxfee", &resp, util.SatoshisToBSV(int64(amount)))
 }
 
 func (c *client) SignMessage(ctx context.Context, address, message string) (string, error) {

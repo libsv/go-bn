@@ -7,8 +7,6 @@ import (
 	"sync"
 
 	"github.com/libsv/go-bn"
-	"github.com/libsv/go-bn/internal/util"
-	"github.com/libsv/go-bt/v2"
 )
 
 func main() {
@@ -24,20 +22,12 @@ func main() {
 		go func() {
 			defer wg.Done()
 
-			tx := bt.NewTx()
-			if err := tx.AddP2PKHOutputFromAddress("n4LvK5SVxp8ohxLHS6fXz47ErBLg5WDHgS", util.SatoshisToBSV(2)); err != nil {
-				panic(err)
-			}
-			fundedTx, err := c.FundRawTransaction(ctx, tx, nil)
-			if err != nil {
-				panic(err)
-			}
-			signedTx, err := c.SignRawTransaction(ctx, fundedTx.Tx, nil)
+			blockHeader, err := c.BlockHeader(ctx, "2992bf02b5ee83676bcd6e19aac395ce624cfed74ad1a2d9875789bdb3aab194")
 			if err != nil {
 				panic(err)
 			}
 
-			bb, err := json.MarshalIndent(signedTx.Tx, "", "  ")
+			bb, err := json.MarshalIndent(blockHeader, "", "  ")
 			if err != nil {
 				panic(err)
 			}

@@ -17,7 +17,7 @@ type InternalFundRawTransaction struct {
 func (i *InternalFundRawTransaction) PostProcess() error {
 	var err error
 	i.Tx, err = bt.NewTxFromString(i.Hex)
-	i.Fee = util.SatoshisToBSV(i.BsvFee)
+	i.Fee = util.BSVToSatoshis(i.BsvFee)
 	return err
 }
 

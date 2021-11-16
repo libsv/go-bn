@@ -59,6 +59,7 @@ type BlockHeader struct {
 	NextBlockHash string `json:"nextblockhash"`
 }
 
+// UnmarshalJSON unmarshal response.
 func (b *BlockHeader) UnmarshalJSON(bb []byte) error {
 	bh := struct {
 		Hash              string  `json:"hash"`
@@ -107,6 +108,7 @@ func (b *BlockHeader) UnmarshalJSON(bb []byte) error {
 	return nil
 }
 
+// MarshalJSON marshal response.
 func (b *BlockHeader) MarshalJSON() ([]byte, error) {
 	cpy := *b
 	cpy.BlockHeader = nil

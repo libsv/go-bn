@@ -54,6 +54,7 @@ type Transaction struct {
 	Tx              *bt.Tx `json:"tx"`
 }
 
+// TransactionDetail model.
 type TransactionDetail struct {
 	Account   string
 	Address   string

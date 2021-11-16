@@ -196,6 +196,8 @@ func TestWalletClient_ReceivedByAddress(t *testing.T) {
 }
 
 func TestWalletClient_DumpPrivateKey(t *testing.T) {
+	t.Parallel()
+
 	tests := map[string]struct {
 		testFile   string
 		address    string

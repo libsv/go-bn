@@ -8,3 +8,7 @@ package mocks
 //go:generate moq -pkg mocks -out transaction_client.go ../ TransactionClient
 //go:generate moq -pkg mocks -out util_client.go ../ UtilClient
 //go:generate moq -pkg mocks -out wallet_client.go ../ WalletClient
+
+// Third party
+
+//go:generate moq -pkg mocks -out zmq4_mock.go ../vendor/github.com/go-zeromq/zmq4 Socket

@@ -16,6 +16,8 @@ import (
 )
 
 func TestUtilClient_SignMessageWithPrivKey(t *testing.T) {
+	t.Parallel()
+
 	tests := map[string]struct {
 		testFile   string
 		wif        *wif.WIF

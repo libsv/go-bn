@@ -5,7 +5,7 @@ go 1.17
 require (
 	github.com/go-zeromq/zmq4 v0.13.0
 	github.com/libsv/go-bc v0.1.7
-	github.com/libsv/go-bk v0.1.4
+	github.com/libsv/go-bk v0.1.5
 	github.com/libsv/go-bt/v2 v2.0.0-beta.10.0.20211109151324-845515044528
 	github.com/pkg/errors v0.9.1
 	github.com/stretchr/testify v1.7.0

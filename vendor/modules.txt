@@ -9,8 +9,10 @@ github.com/go-zeromq/goczmq/v4
 github.com/go-zeromq/zmq4
 github.com/go-zeromq/zmq4/internal/inproc
 github.com/go-zeromq/zmq4/transport
-# github.com/libsv/go-bc v0.1.7
-## explicit; go 1.15
+# github.com/kr/text v0.2.0
+## explicit
+# github.com/libsv/go-bc v0.1.8
+## explicit; go 1.17
 github.com/libsv/go-bc
 # github.com/libsv/go-bk v0.1.6
 ## explicit; go 1.17
@@ -20,8 +22,8 @@ github.com/libsv/go-bk/bip32
 github.com/libsv/go-bk/chaincfg
 github.com/libsv/go-bk/crypto
 github.com/libsv/go-bk/wif
-# github.com/libsv/go-bt/v2 v2.0.0-beta.10.0.20211109151324-845515044528
-## explicit; go 1.16
+# github.com/libsv/go-bt/v2 v2.1.0-beta.2
+## explicit; go 1.17
 github.com/libsv/go-bt/v2
 github.com/libsv/go-bt/v2/bscript
 github.com/libsv/go-bt/v2/sighash

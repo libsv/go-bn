@@ -3,7 +3,7 @@ module github.com/libsv/go-bn
 go 1.17
 
 require (
-	github.com/go-zeromq/zmq4 v0.14.0
+	github.com/go-zeromq/zmq4 v0.14.1
 	github.com/libsv/go-bc v0.1.8
 	github.com/libsv/go-bk v0.1.6
 	github.com/libsv/go-bt/v2 v2.1.0-beta.2

@@ -104,7 +104,7 @@ func (b *BlockHeader) UnmarshalJSON(bb []byte) error {
 	b.Difficulty = bh.Difficulty
 	b.Chainwork = bh.Chainwork
 	b.NextBlockHash = bh.NextBlockHash
-	*b.BlockHeader = blockHeader
+	b.BlockHeader = &blockHeader
 	return nil
 }
 

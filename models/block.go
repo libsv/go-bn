@@ -22,21 +22,31 @@ type Block struct {
 
 // UnmarshalJSON unmarshal response.
 func (b *Block) UnmarshalJSON(bb []byte) error {
-	bj := struct {
-		Txs json.RawMessage `json:"tx"`
+	bh := struct {
 		BlockHeader
+	}{
+		BlockHeader: BlockHeader{
+			BlockHeader: &bc.BlockHeader{},
+		},
+	}
+	if err := json.Unmarshal(bb, &bh); err != nil {
+		return err
+	}
+
+	btxs := struct {
+		Txs json.RawMessage `json:"tx"`
 	}{}
-	if err := json.Unmarshal(bb, &bj); err != nil {
+	if err := json.Unmarshal(bb, &btxs); err != nil {
 		return err
 	}
 
 	var txs bt.Txs
-	if err := json.Unmarshal(bj.Txs, txs.NodeJSON()); err != nil {
+	if err := json.Unmarshal(btxs.Txs, txs.NodeJSON()); err != nil {
 		return err
 	}
 
 	b.Txs = txs
-	b.BlockHeader = bj.BlockHeader
+	b.BlockHeader = bh.BlockHeader
 	return nil
 }
 

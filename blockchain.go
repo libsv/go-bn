@@ -70,22 +70,22 @@ func (c *client) BlockHexByHeight(ctx context.Context, height int) (string, erro
 }
 
 func (c *client) BlockDecodeHeader(ctx context.Context, hash string) (*models.BlockDecodeHeader, error) {
-	var resp models.BlockDecodeHeader
+	resp := models.BlockDecodeHeader{BlockHeader: models.BlockHeader{BlockHeader: &bc.BlockHeader{}}}
 	return &resp, c.rpc.Do(ctx, "getblock", &resp, hash, models.VerbosityDecodeHeader)
 }
 
 func (c *client) BlockDecodeHeaderByHeight(ctx context.Context, height int) (*models.BlockDecodeHeader, error) {
-	var resp models.BlockDecodeHeader
+	resp := models.BlockDecodeHeader{BlockHeader: models.BlockHeader{BlockHeader: &bc.BlockHeader{}}}
 	return &resp, c.rpc.Do(ctx, "getblockbyheight", &resp, height, models.VerbosityDecodeHeader)
 }
 
 func (c *client) Block(ctx context.Context, hash string) (*models.Block, error) {
-	var resp models.Block
+	resp := models.Block{BlockHeader: models.BlockHeader{BlockHeader: &bc.BlockHeader{}}}
 	return &resp, c.rpc.Do(ctx, "getblock", &resp, hash, models.VerbosityDecodeTransactions)
 }
 
 func (c *client) BlockByHeight(ctx context.Context, height int) (*models.Block, error) {
-	var resp models.Block
+	resp := models.Block{BlockHeader: models.BlockHeader{BlockHeader: &bc.BlockHeader{}}}
 	return &resp, c.rpc.Do(ctx, "getblockbyheight", &resp, height, models.VerbosityDecodeTransactions)
 }
 

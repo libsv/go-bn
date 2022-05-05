@@ -6,7 +6,7 @@ require (
 	github.com/go-zeromq/zmq4 v0.14.1
 	github.com/libsv/go-bc v0.1.11
 	github.com/libsv/go-bk v0.1.6
-	github.com/libsv/go-bt/v2 v2.1.0-beta.2
+	github.com/libsv/go-bt/v2 v2.1.0-beta.3
 	github.com/pkg/errors v0.9.1
 	github.com/stretchr/testify v1.7.1
 	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c

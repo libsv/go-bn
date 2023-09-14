@@ -42,8 +42,7 @@ type socket struct {
 	autoReconnect bool
 
 	mu    sync.RWMutex
-	ids   map[string]*Conn // ZMTP connection IDs
-	conns []*Conn          // ZMTP connections
+	conns []*Conn // ZMTP connections
 	r     rpool
 	w     wpool
 
@@ -69,7 +68,6 @@ func newDefaultSocket(ctx context.Context, sockType SocketType) *socket {
 		retry:      defaultRetry,
 		maxRetries: defaultMaxRetries,
 		sec:        nullSecurity{},
-		ids:        make(map[string]*Conn),
 		conns:      nil,
 		r:          newQReader(ctx),
 		w:          newMWriter(ctx),
@@ -181,16 +179,12 @@ func (sck *socket) Listen(endpoint string) error {
 		return err
 	}
 
-	var l net.Listener
-
 	trans, ok := drivers.get(network)
-	switch {
-	case ok:
-		l, err = trans.Listen(sck.ctx, addr)
-	default:
-		panic("zmq4: unknown protocol " + network)
+	if !ok {
+		return UnknownTransportError{Name: network}
 	}
 
+	l, err := trans.Listen(sck.ctx, addr)
 	if err != nil {
 		return fmt.Errorf("zmq4: could not listen to %q: %w", endpoint, err)
 	}
@@ -243,14 +237,12 @@ func (sck *socket) Dial(endpoint string) error {
 		trans, ok = drivers.get(network)
 		retries   = 0
 	)
-connect:
-	switch {
-	case ok:
-		conn, err = trans.Dial(sck.ctx, &sck.dialer, addr)
-	default:
-		panic("zmq4: unknown protocol " + network)
+	if !ok {
+		return UnknownTransportError{Name: network}
 	}
 
+connect:
+	conn, err = trans.Dial(sck.ctx, &sck.dialer, addr)
 	if err != nil {
 		// retry if retry count is lower than maximum retry count and context has not been canceled
 		if (sck.maxRetries == -1 || retries < sck.maxRetries) && sck.ctx.Err() == nil {
@@ -285,12 +277,14 @@ func (sck *socket) addConn(c *Conn) {
 	sck.mu.Lock()
 	defer sck.mu.Unlock()
 	sck.conns = append(sck.conns, c)
-	uuid, ok := c.Peer.Meta[sysSockID]
-	if !ok {
-		uuid = newUUID()
-		c.Peer.Meta[sysSockID] = uuid
+	if len(c.Peer.Meta[sysSockID]) == 0 {
+		switch c.typ {
+		case Router: // TODO: STREAM type when implemented
+			// if empty Identity metadata is received from some client
+			// need to assign an uuid such that router socket can reply to the correct client
+			c.Peer.Meta[sysSockID] = newUUID()
+		}
 	}
-	sck.ids[uuid] = c
 	if sck.w != nil {
 		sck.w.addConn(c)
 	}

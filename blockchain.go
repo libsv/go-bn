@@ -27,6 +27,7 @@ type BlockChainClient interface {
 	ChainTips(ctx context.Context) ([]*models.ChainTip, error)
 	ChainTxStats(ctx context.Context, opts *models.OptsChainTxStats) (*models.ChainTxStats, error)
 	Difficulty(ctx context.Context) (float64, error)
+	InvalidateBlock(ctx context.Context, blockHash string) error
 	MerkleProof(ctx context.Context, blockHash, txID string, opts *models.OptsMerkleProof) (*bc.MerkleProof, error)
 	LegacyMerkleProof(ctx context.Context, txID string,
 		opts *models.OptsLegacyMerkleProof) (*models.LegacyMerkleProof, error)
@@ -137,6 +138,10 @@ func (c *client) ChainTxStats(ctx context.Context, opts *models.OptsChainTxStats
 func (c *client) Difficulty(ctx context.Context) (float64, error) {
 	var resp float64
 	return resp, c.rpc.Do(ctx, "getdifficulty", &resp)
+}
+
+func (c *client) InvalidateBlock(ctx context.Context, blockHash string) error {
+	return c.rpc.Do(ctx, "invalidateblock", nil, blockHash)
 }
 
 func (c *client) MempoolEntry(ctx context.Context, txID string) (*models.MempoolEntry, error) {

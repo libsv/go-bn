@@ -542,6 +542,9 @@ type NodeClientMock struct {
 	// InfoFunc mocks the Info method.
 	InfoFunc func(ctx context.Context) (*models.Info, error)
 
+	// InvalidateBlockFunc mocks the InvalidateBlock method.
+	InvalidateBlockFunc func(ctx context.Context, hash string) error
+
 	// KeypoolRefillFunc mocks the KeypoolRefill method.
 	KeypoolRefillFunc func(ctx context.Context, opts *models.OptsKeypoolRefill) error
 
@@ -1106,6 +1109,13 @@ type NodeClientMock struct {
 		Info []struct {
 			// Ctx is the ctx argument value.
 			Ctx context.Context
+		}
+		// InvalidateBlock holds details about calls to the InvalidateBlock method.
+		InvalidateBlock []struct {
+			// Ctx is the ctx argument value.
+			Ctx context.Context
+			// BlockHash is the hash argument value.
+			BlockHash string
 		}
 		// KeypoolRefill holds details about calls to the KeypoolRefill method.
 		KeypoolRefill []struct {
@@ -1677,6 +1687,7 @@ type NodeClientMock struct {
 	lockImportPublicKey           sync.RWMutex
 	lockImportWallet              sync.RWMutex
 	lockInfo                      sync.RWMutex
+	lockInvalidateBlock                     sync.RWMutex
 	lockKeypoolRefill             sync.RWMutex
 	lockLegacyMerkleProof         sync.RWMutex
 	lockListAccounts              sync.RWMutex
@@ -3472,6 +3483,24 @@ func (mock *NodeClientMock) InfoCalls() []struct {
 	calls = mock.calls.Info
 	mock.lockInfo.RUnlock()
 	return calls
+}
+
+// InvalidateBlock calls InvalidateBlockFunc.
+func (mock *NodeClientMock) InvalidateBlock(ctx context.Context, hash string) error {
+	if mock.InvalidateBlockFunc == nil {
+		panic("NodeClientMock.InvalidateBlockFunc: method is nil but NodeClient.InvalidateBlock was just called")
+	}
+	callInfo := struct {
+		Ctx  context.Context
+		BlockHash string
+	}{
+		Ctx:  ctx,
+		BlockHash: hash,
+	}
+	mock.lockBlock.Lock()
+	mock.calls.InvalidateBlock = append(mock.calls.InvalidateBlock, callInfo)
+	mock.lockBlock.Unlock()
+	return mock.InvalidateBlockFunc(ctx, hash)
 }
 
 // KeypoolRefill calls KeypoolRefillFunc.

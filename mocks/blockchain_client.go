@@ -196,6 +196,9 @@ type BlockChainClientMock struct {
 	// GenerateToAddressFunc mocks the GenerateToAddress method.
 	GenerateToAddressFunc func(ctx context.Context, n int, addr string, opts *models.OptsGenerate) ([]string, error)
 
+	// InvalidateBlockFunc mockes the InvalidateBlock method
+	InvalidateBlockFunc func(ctx context.Context, blockHash string) error
+
 	// LegacyMerkleProofFunc mocks the LegacyMerkleProof method.
 	LegacyMerkleProofFunc func(ctx context.Context, txID string, opts *models.OptsLegacyMerkleProof) (*models.LegacyMerkleProof, error)
 
@@ -384,6 +387,13 @@ type BlockChainClientMock struct {
 			// Opts is the opts argument value.
 			Opts *models.OptsGenerate
 		}
+		// InvalidateBlock holds details about calls to the InvalidateBlock method
+		InvalidateBlock []struct {
+			// Ctx is the ctx argument value
+			Ctx context.Context
+			// BlockHash is the hash of the block to invalidate
+			BlockHash string
+		}
 		// LegacyMerkleProof holds details about calls to the LegacyMerkleProof method.
 		LegacyMerkleProof []struct {
 			// Ctx is the ctx argument value.
@@ -515,6 +525,7 @@ type BlockChainClientMock struct {
 	lockDifficulty                sync.RWMutex
 	lockGenerate                  sync.RWMutex
 	lockGenerateToAddress         sync.RWMutex
+	lockInvalidateBlock sync.RWMutex
 	lockLegacyMerkleProof         sync.RWMutex
 	lockMempoolAncestorIDs        sync.RWMutex
 	lockMempoolAncestors          sync.RWMutex
@@ -1227,6 +1238,24 @@ func (mock *BlockChainClientMock) GenerateToAddressCalls() []struct {
 	calls = mock.calls.GenerateToAddress
 	mock.lockGenerateToAddress.RUnlock()
 	return calls
+}
+
+// InvalidateBlock calls InvalidateBlockFunc.
+func (mock *BlockChainClientMock) InvalidateBlock(ctx context.Context, hash string) error {
+	if mock.InvalidateBlockFunc == nil {
+		panic("BlockChainClientMock.InvalidateBlockFunc: method is nil but BlockChainClient.InvalidateBlock was just called")
+	}
+	callInfo := struct {
+		Ctx  context.Context
+		BlockHash string
+	}{
+		Ctx:  ctx,
+		BlockHash: hash,
+	}
+	mock.lockInvalidateBlock.Lock()
+	mock.calls.InvalidateBlock = append(mock.calls.InvalidateBlock, callInfo)
+	mock.lockInvalidateBlock.Unlock()
+	return mock.InvalidateBlockFunc(ctx, hash)
 }
 
 // LegacyMerkleProof calls LegacyMerkleProofFunc.

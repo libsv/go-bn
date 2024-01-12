@@ -2,7 +2,6 @@ package bn
 
 import (
 	"context"
-
 	imodels "github.com/libsv/go-bn/internal/models"
 	"github.com/libsv/go-bn/models"
 	"github.com/libsv/go-bt/v2"
@@ -10,6 +9,8 @@ import (
 
 // TransactionClient interfaces interaction with the transaction sub commands on a bitcoin node.
 type TransactionClient interface {
+	AddToConfiscationTransactionWhitelist(ctx context.Context, funds []models.ConfiscationTransactionDetails) (*models.AddToConfiscationTransactionWhitelistResponse, error)
+	AddToConsensusBlacklist(ctx context.Context, funds []models.Fund) (*models.AddToConsensusBlacklistResponse, error)
 	CreateRawTransaction(ctx context.Context, utxos bt.UTXOs, params models.ParamsCreateRawTransaction) (*bt.Tx, error)
 	FundRawTransaction(ctx context.Context, tx *bt.Tx,
 		opts *models.OptsFundRawTransaction) (*models.FundRawTransaction, error)
@@ -64,4 +65,18 @@ func (c *client) SendRawTransactions(ctx context.Context,
 	params ...models.ParamsSendRawTransactions) (*models.SendRawTransactionsResponse, error) {
 	var resp models.SendRawTransactionsResponse
 	return &resp, c.rpc.Do(ctx, "sendrawtransactions", &resp, params)
+}
+
+func (c *client) AddToConsensusBlacklist(ctx context.Context, funds []models.Fund) (*models.AddToConsensusBlacklistResponse, error) {
+	var resp models.AddToConsensusBlacklistResponse
+	req := models.AddToConsensusBlacklistArgs{Funds: funds}
+	return &resp, c.rpc.Do(ctx, "addToConsensusBlacklist", &resp, req)
+}
+
+func (c *client) AddToConfiscationTransactionWhitelist(ctx context.Context, confiscationTransactions []models.ConfiscationTransactionDetails) (*models.AddToConfiscationTransactionWhitelistResponse, error) {
+	var resp models.AddToConfiscationTransactionWhitelistResponse
+	req := models.AddToConfiscationTxIdWhitelistArgs{
+		confiscationTransactions,
+	}
+	return &resp, c.rpc.Do(ctx, "addToConfiscationTxidWhitelist", &resp, req)
 }

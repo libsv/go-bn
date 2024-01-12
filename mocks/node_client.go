@@ -416,6 +416,12 @@ type NodeClientMock struct {
 	// AddNodeFunc mocks the AddNode method.
 	AddNodeFunc func(ctx context.Context, node string, command internal.NodeAddType) error
 
+	// AddToConfiscationTransactionWhitelist mocks the AddToConfiscationTransactionWhitelist method
+	AddToConfiscationTransactionWhitelistFunc func(ctx context.Context, confiscationTransactions []models.ConfiscationTransactionDetails) (*models.AddToConfiscationTransactionWhitelistResponse, error)
+
+	// AddToConsensusBlacklistFunc mocks the AddToConsensusBlacklist
+	AddToConsensusBlacklistFunc func(ctx context.Context, funds []models.Fund) (*models.AddToConsensusBlacklistResponse, error)
+
 	// BackupWalletFunc mocks the BackupWallet method.
 	BackupWalletFunc func(ctx context.Context, dest string) error
 
@@ -813,6 +819,20 @@ type NodeClientMock struct {
 			Node string
 			// Command is the command argument value.
 			Command internal.NodeAddType
+		}
+		// AddToConfiscationTransactionWhitelist holds details about calls to the AddToConfiscationTransactionWhitelist method
+		AddToConfiscationTransactionWhitelist []struct {
+			// Ctx is the ctx argument value.
+			Ctx context.Context
+			// ConfiscationTransactions is the confiscation transactions argument value
+			ConfiscationTransactions []models.ConfiscationTransactionDetails
+		}
+		// AddToConsensusBlacklist holds details about calls to the AddToConsensusBlacklist method
+		AddToConsensusBlacklist []struct {
+			// Ctx is the ctx argument value.
+			Ctx context.Context
+			// Funds is the funds argument value
+			Funds []models.Fund
 		}
 		// BackupWallet holds details about calls to the BackupWallet method.
 		BackupWallet []struct {
@@ -1645,6 +1665,8 @@ type NodeClientMock struct {
 	lockActiveZMQNotifications    sync.RWMutex
 	lockAddMultiSigAddress        sync.RWMutex
 	lockAddNode                   sync.RWMutex
+	lockAddToConsensusBlacklist                   sync.RWMutex
+	lockAddToConfiscationTransactionWhitelist sync.RWMutex
 	lockBackupWallet              sync.RWMutex
 	lockBalance                   sync.RWMutex
 	lockBestBlockHash             sync.RWMutex
@@ -2009,6 +2031,42 @@ func (mock *NodeClientMock) AddNodeCalls() []struct {
 	calls = mock.calls.AddNode
 	mock.lockAddNode.RUnlock()
 	return calls
+}
+
+// AddToConfiscationTransactionWhitelist calls AddToConfiscationTransactionWhitelistFunc
+func (mock *NodeClientMock) AddToConfiscationTransactionWhitelist(ctx context.Context, confiscationTxs []models.ConfiscationTransactionDetails) (*models.AddToConfiscationTransactionWhitelistResponse, error) {
+	if mock.AddToConfiscationTransactionWhitelistFunc == nil {
+		panic("TransactionClientMock.AddToConfiscationTransactionWhitelistFunc: method is nil but TransactionClient.AddToConfiscationTransactionWhitelist was just called")
+	}
+	callInfo := struct {
+		Ctx   context.Context
+		ConfiscationTransactions []models.ConfiscationTransactionDetails
+	}{
+		Ctx: ctx,
+		ConfiscationTransactions: confiscationTxs,
+	}
+	mock.lockAddToConfiscationTransactionWhitelist.Lock()
+	mock.calls.AddToConfiscationTransactionWhitelist = append(mock.calls.AddToConfiscationTransactionWhitelist, callInfo)
+	mock.lockAddToConfiscationTransactionWhitelist.Unlock()
+	return mock.AddToConfiscationTransactionWhitelist(ctx, confiscationTxs)
+}
+
+// AddToConsensusBlacklist calls AddToConsensusBlacklistFunc
+func (mock *NodeClientMock) AddToConsensusBlacklist(ctx context.Context, funds []models.Fund) (*models.AddToConsensusBlacklistResponse, error) {
+	if mock.AddToConsensusBlacklistFunc == nil {
+		panic("TransactionClientMock.AddToConsensusBlacklistFunc: method is nil but TransactionClient.CreateRawTransaction was just called")
+	}
+	callInfo := struct {
+		Ctx   context.Context
+		Funds []models.Fund
+	}{
+		Ctx: ctx,
+		Funds: funds,
+	}
+	mock.lockAddToConsensusBlacklist.Lock()
+	mock.calls.AddToConsensusBlacklist = append(mock.calls.AddToConsensusBlacklist, callInfo)
+	mock.lockAddToConsensusBlacklist.Unlock()
+	return mock.AddToConsensusBlacklistFunc(ctx, funds)
 }
 
 // BackupWallet calls BackupWalletFunc.

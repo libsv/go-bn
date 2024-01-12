@@ -18,6 +18,42 @@ type Output struct {
 	*bt.Output
 }
 
+type AddToConsensusBlacklistArgs struct {
+	Funds []Fund `json:"funds"`
+}
+
+type AddToConfiscationTxIdWhitelistArgs struct {
+	ConfiscationTransactions []ConfiscationTransactionDetails `json:"confiscationTxs"`
+}
+
+type ConfiscationTransactionDetails struct {
+	ConfiscationTransaction ConfiscationTransaction `json:"confiscationTx"`
+}
+
+type ConfiscationTransaction struct {
+	EnforceAtHeight int64  `json:"enforceAtHeight"`
+	Hex             string `json:"hex"`
+}
+
+// Fund represents a fund to freeze or unfreeze
+type Fund struct {
+	TxOut                      TxOut     `json:"txOut"`
+	EnforceAtHeight            []Enforce `json:"enforceAtHeight"`
+	PolicyExpiresWithConsensus bool      `json:"policyExpiresWithConsensus"`
+}
+
+// Enforce represents block start and end to enforce freezing
+type Enforce struct {
+	Start int `json:"start"`
+	Stop  int `json:"stop"`
+}
+
+// Txout represents transaction output
+type TxOut struct {
+	TxId string `json:"txId""`
+	Vout int    `json:"vout"`
+}
+
 // NodeJSON return node json variant.
 func (o *Output) NodeJSON() interface{} {
 	return o
@@ -211,4 +247,24 @@ type SendRawTransactionsResponse struct {
 			} `json:"vin"`
 		} `json:"ancestors"`
 	} `json:"unconfirmed"`
+}
+
+// AddToConsensusBlacklistResponse response
+type AddToConsensusBlacklistResponse struct {
+	NotProcessed []struct {
+		TxOut struct {
+			TxId string `json:"txId"`
+			Vout int    `json:"vout"`
+		} `json:"txOut"`
+		Reason string `json:"reason"`
+	} `json:"notProcessed"`
+}
+
+type AddToConfiscationTransactionWhitelistResponse struct {
+	NotProcessed []struct {
+		ConfiscationTransaction struct {
+			TxId string `json:"txId"`
+		} `json:"confiscationTx"`
+		Reason string `json:"reason"`
+	} `json:"notProcessed"`
 }

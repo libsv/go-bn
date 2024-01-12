@@ -46,6 +46,12 @@ var _ bn.TransactionClient = &TransactionClientMock{}
 //
 // 	}
 type TransactionClientMock struct {
+	// AddToConfiscationTransactionWhitelist mocks the AddToConfiscationTransactionWhitelist method
+	AddToConfiscationTransactionWhitelistFunc func(ctx context.Context, confiscationTransactions []models.ConfiscationTransactionDetails) (*models.AddToConfiscationTransactionWhitelistResponse, error)
+
+	// AddToConsensusBlacklistFunc mocks the AddToConsensusBlacklist method
+	AddToConsensusBlacklistFunc func(ctx context.Context, funds []models.Fund) (*models.AddToConsensusBlacklistResponse, error)
+
 	// CreateRawTransactionFunc mocks the CreateRawTransaction method.
 	CreateRawTransactionFunc func(ctx context.Context, utxos bt.UTXOs, params models.ParamsCreateRawTransaction) (*bt.Tx, error)
 
@@ -66,6 +72,20 @@ type TransactionClientMock struct {
 
 	// calls tracks calls to the methods.
 	calls struct {
+		// AddToConsensusBlacklist holds details about calls to the AddToConsensusBlacklist method
+		AddToConsensusBlacklist []struct {
+			// Ctx is the ctx argument value.
+			Ctx context.Context
+			// Funds is the funds argument value
+			Funds []models.Fund
+		}
+		// AddToConfiscationTransactionWhitelist holds details about calls to the AddToConfiscationTransactionWhitelist method
+		AddToConfiscationTransactionWhitelist []struct {
+			// Ctx is the ctx argument value.
+			Ctx context.Context
+			// ConfiscationTransactions is the confiscation transactions argument value
+			ConfiscationTransactions []models.ConfiscationTransactionDetails
+		}
 		// CreateRawTransaction holds details about calls to the CreateRawTransaction method.
 		CreateRawTransaction []struct {
 			// Ctx is the ctx argument value.
@@ -117,12 +137,50 @@ type TransactionClientMock struct {
 			Opts *models.OptsSignRawTransaction
 		}
 	}
+	lockAddToConsensusBlacklist sync.RWMutex
+	lockAddToConfiscationTransactionWhitelist sync.RWMutex
 	lockCreateRawTransaction sync.RWMutex
 	lockFundRawTransaction   sync.RWMutex
 	lockRawTransaction       sync.RWMutex
 	lockSendRawTransaction   sync.RWMutex
 	lockSendRawTransactions  sync.RWMutex
 	lockSignRawTransaction   sync.RWMutex
+}
+
+// AddToConsensusBlacklist calls AddToConsensusBlacklistFunc
+func (mock *TransactionClientMock) AddToConsensusBlacklist(ctx context.Context, funds []models.Fund) (*models.AddToConsensusBlacklistResponse, error) {
+	if mock.AddToConsensusBlacklistFunc == nil {
+		panic("TransactionClientMock.AddToConsensusBlacklistFunc: method is nil but TransactionClient.AddToConsensusBlacklist was just called")
+	}
+	callInfo := struct {
+		Ctx   context.Context
+		Funds []models.Fund
+	}{
+		Ctx: ctx,
+		Funds: funds,
+	}
+	mock.lockAddToConsensusBlacklist.Lock()
+	mock.calls.AddToConsensusBlacklist = append(mock.calls.AddToConsensusBlacklist, callInfo)
+	mock.lockAddToConsensusBlacklist.Unlock()
+	return mock.AddToConsensusBlacklistFunc(ctx, funds)
+}
+
+// AddToConfiscationTransactionWhitelist calls AddToConfiscationTransactionWhitelistFunc
+func (mock *TransactionClientMock) AddToConfiscationTransactionWhitelist(ctx context.Context, confiscationTxs []models.ConfiscationTransactionDetails) (*models.AddToConfiscationTransactionWhitelistResponse, error) {
+	if mock.AddToConfiscationTransactionWhitelistFunc == nil {
+		panic("TransactionClientMock.AddToConfiscationTransactionWhitelistFunc: method is nil but TransactionClient.AddToConfiscationTransactionWhitelist was just called")
+	}
+	callInfo := struct {
+		Ctx   context.Context
+		ConfiscationTransactions []models.ConfiscationTransactionDetails
+	}{
+		Ctx: ctx,
+		ConfiscationTransactions: confiscationTxs,
+	}
+	mock.lockAddToConfiscationTransactionWhitelist.Lock()
+	mock.calls.AddToConfiscationTransactionWhitelist = append(mock.calls.AddToConfiscationTransactionWhitelist, callInfo)
+	mock.lockAddToConfiscationTransactionWhitelist.Unlock()
+	return mock.AddToConfiscationTransactionWhitelist(ctx, confiscationTxs)
 }
 
 // CreateRawTransaction calls CreateRawTransactionFunc.

@@ -50,7 +50,7 @@ type Enforce struct {
 
 // Txout represents transaction output
 type TxOut struct {
-	TxId string `json:"txId""`
+	TxId string `json:"txId"`
 	Vout int    `json:"vout"`
 }
 

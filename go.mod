@@ -1,6 +1,6 @@
 module github.com/libsv/go-bn
 
-go 1.17
+go 1.24.0
 
 require (
 	github.com/go-zeromq/zmq4 v0.15.0
@@ -9,7 +9,7 @@ require (
 	github.com/libsv/go-bt/v2 v2.1.0-beta.4
 	github.com/pkg/errors v0.9.1
 	github.com/stretchr/testify v1.8.0
-	golang.org/x/sync v0.0.0-20220601150217-0de741cfad7f
+	golang.org/x/sync v0.18.0
 )
 
 require (

@@ -40,10 +40,10 @@ type socket struct {
 	log           *log.Logger
 	subTopics     func() []string
 	autoReconnect bool
+	timeout       time.Duration
 
 	mu    sync.RWMutex
-	ids   map[string]*Conn // ZMTP connection IDs
-	conns []*Conn          // ZMTP connections
+	conns []*Conn // ZMTP connections
 	r     rpool
 	w     wpool
 
@@ -68,8 +68,8 @@ func newDefaultSocket(ctx context.Context, sockType SocketType) *socket {
 		typ:        sockType,
 		retry:      defaultRetry,
 		maxRetries: defaultMaxRetries,
+		timeout:    defaultTimeout,
 		sec:        nullSecurity{},
-		ids:        make(map[string]*Conn),
 		conns:      nil,
 		r:          newQReader(ctx),
 		w:          newMWriter(ctx),
@@ -120,8 +120,12 @@ func (sck *socket) topics() []string {
 
 // Close closes the open Socket
 func (sck *socket) Close() error {
+	// The Lock around Signal ensures the connReaper is running
+	// and is in sck.reaperCond.Wait()
+	sck.reaperCond.L.Lock()
 	sck.cancel()
 	sck.reaperCond.Signal()
+	sck.reaperCond.L.Unlock()
 
 	if sck.listener != nil {
 		defer sck.listener.Close()
@@ -149,7 +153,7 @@ func (sck *socket) Close() error {
 // Send puts the message on the outbound send queue.
 // Send blocks until the message can be queued or the send deadline expires.
 func (sck *socket) Send(msg Msg) error {
-	ctx, cancel := context.WithTimeout(sck.ctx, sck.timeout())
+	ctx, cancel := context.WithTimeout(sck.ctx, sck.Timeout())
 	defer cancel()
 	return sck.w.write(ctx, msg)
 }
@@ -159,7 +163,7 @@ func (sck *socket) Send(msg Msg) error {
 // The message will be sent as a multipart message.
 func (sck *socket) SendMulti(msg Msg) error {
 	msg.multipart = true
-	ctx, cancel := context.WithTimeout(sck.ctx, sck.timeout())
+	ctx, cancel := context.WithTimeout(sck.ctx, sck.Timeout())
 	defer cancel()
 	return sck.w.write(ctx, msg)
 }
@@ -181,23 +185,23 @@ func (sck *socket) Listen(endpoint string) error {
 		return err
 	}
 
-	var l net.Listener
-
 	trans, ok := drivers.get(network)
-	switch {
-	case ok:
-		l, err = trans.Listen(sck.ctx, addr)
-	default:
-		panic("zmq4: unknown protocol " + network)
+	if !ok {
+		return UnknownTransportError{Name: network}
 	}
 
+	l, err := trans.Listen(sck.ctx, addr)
 	if err != nil {
 		return fmt.Errorf("zmq4: could not listen to %q: %w", endpoint, err)
 	}
 	sck.listener = l
 
 	go sck.accept()
-	go sck.connReaper()
+	if !sck.reaperStarted {
+		sck.reaperCond.L.Lock()
+		go sck.connReaper()
+		sck.reaperStarted = true
+	}
 
 	return nil
 }
@@ -243,14 +247,12 @@ func (sck *socket) Dial(endpoint string) error {
 		trans, ok = drivers.get(network)
 		retries   = 0
 	)
-connect:
-	switch {
-	case ok:
-		conn, err = trans.Dial(sck.ctx, &sck.dialer, addr)
-	default:
-		panic("zmq4: unknown protocol " + network)
+	if !ok {
+		return UnknownTransportError{Name: network}
 	}
 
+connect:
+	conn, err = trans.Dial(sck.ctx, &sck.dialer, addr)
 	if err != nil {
 		// retry if retry count is lower than maximum retry count and context has not been canceled
 		if (sck.maxRetries == -1 || retries < sck.maxRetries) && sck.ctx.Err() == nil {
@@ -274,6 +276,7 @@ connect:
 	}
 
 	if !sck.reaperStarted {
+		sck.reaperCond.L.Lock()
 		go sck.connReaper()
 		sck.reaperStarted = true
 	}
@@ -285,12 +288,14 @@ func (sck *socket) addConn(c *Conn) {
 	sck.mu.Lock()
 	defer sck.mu.Unlock()
 	sck.conns = append(sck.conns, c)
-	uuid, ok := c.Peer.Meta[sysSockID]
-	if !ok {
-		uuid = newUUID()
-		c.Peer.Meta[sysSockID] = uuid
+	if len(c.Peer.Meta[sysSockID]) == 0 {
+		switch c.typ {
+		case Router: // TODO: STREAM type when implemented
+			// if empty Identity metadata is received from some client
+			// need to assign an uuid such that router socket can reply to the correct client
+			c.Peer.Meta[sysSockID] = newUUID()
+		}
 	}
-	sck.ids[uuid] = c
 	if sck.w != nil {
 		sck.w.addConn(c)
 	}
@@ -371,13 +376,16 @@ func (sck *socket) SetOption(name string, value interface{}) error {
 	return nil
 }
 
-func (sck *socket) timeout() time.Duration {
-	// FIXME(sbinet): extract from options
-	return defaultTimeout
+func (sck *socket) Timeout() time.Duration {
+	return sck.timeout
 }
 
 func (sck *socket) connReaper() {
-	sck.reaperCond.L.Lock()
+	// We are not locking here sck.reaperCond.L.Lock()
+	// as it should be locked prior starting connReaper as goroutine
+	// That would ensure that sck.reaperCond.Signal()
+	// would be delivered only when reaper goroutine is really started
+	// and is in sck.reaperCond.Wait()
 	defer sck.reaperCond.L.Unlock()
 
 	for {
@@ -389,10 +397,16 @@ func (sck *socket) connReaper() {
 			return
 		}
 
-		for _, c := range sck.closedConns {
+		// Clone the known closed connections to avoid data race
+		// and remove those under reaper unlocked.
+		// That should fix the deadlock reported in #149.
+		cc := append([]*Conn{}, sck.closedConns...) // clone
+		sck.closedConns = sck.closedConns[:0]
+		sck.reaperCond.L.Unlock()
+		for _, c := range cc {
 			sck.rmConn(c)
 		}
-		sck.closedConns = nil
+		sck.reaperCond.L.Lock()
 	}
 }
 
